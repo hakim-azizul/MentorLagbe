@@ -4,6 +4,7 @@ export type tApplication = {
   tuitionTitle: string;
   subject: string;
   monthlyFee: number;
+  tutorName?: string;
   tutorEmail: string;
   studentName: string;
   studentEmail: string;

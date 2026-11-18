@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* প্রজেক্টে ডার্ক মোড নেই, তাই OS ডার্ক প্রেফারেন্সে shadcn কম্পোনেন্ট যেন আংশিক না বদলায় */
+@custom-variant dark (&:is(.dark *));
+
 @theme {
   /* 60% Principle Colors */
   --color-background: #FFFFFF;
@@ -16,6 +19,29 @@
   --color-brand: #00D66C;
   --color-brand-hover: #00B85C;
   --color-brand-tint: #ECFDF5;
+
+  /*
+   * shadcn/ui প্রিমিটিভ টোকেন (ui/* কম্পোনেন্টগুলো এগুলোই ব্যবহার করে) —
+   * উপরের প্যালেটের সাথে ম্যাপ করা, 60-30-10 নিয়ম অপরিবর্তিত।
+   */
+  --color-foreground: #0F172A; /* heading */
+  --color-card: #FFFFFF;
+  --color-card-foreground: #0F172A;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #0F172A;
+  --color-muted: #F1F5F9;
+  --color-muted-foreground: #64748B;
+  --color-primary: #00D66C; /* brand */
+  --color-primary-foreground: #0F172A;
+  --color-secondary: #F1F5F9;
+  --color-secondary-foreground: #0F172A;
+  --color-accent: #F8FAFC; /* surface */
+  --color-accent-foreground: #0F172A;
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #FFFFFF;
+  --color-border: #E2E8F0; /* border-subtle */
+  --color-input: #E2E8F0;
+  --color-ring: #00D66C;
 }
 
 @layer base {

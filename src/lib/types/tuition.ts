@@ -18,7 +18,7 @@ export type tTuition = {
 
 export type tapprovalStatus = "pending" | "approved" | "rejected";
 
-export type tmode = "Online" | "Offline";
+export type tmode = "Online" | "Offline" | "Hybrid";
 
 export type tTuitionView = {
   _id: string;

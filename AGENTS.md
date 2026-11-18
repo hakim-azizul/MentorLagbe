@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # MentorLagbe (mentor-client) — Agent Guide
 
-Frontend for **MentorLagbe**, a tuition & mentorship platform. This repo is the Next.js client app; the server side is the same app (App Router server components + route handlers + better-auth). There is no separate backend folder.
+Frontend for **MentorLagbe**, a tuition & mentorship platform. This repo is the Next.js client app; auth is served by this app (App Router route handlers + better-auth), while the domain REST API (tuitions, applications, admin) lives in the sibling **`../mentor-server`** Express app (MongoDB, port 5000).
 
 ## Stack
 
@@ -50,16 +50,30 @@ src/
       (auth)/
         signin/page.tsx         # route: /signin  (client component)
         signup/page.tsx         # route: /signup  (client component)
+    (dashboard)/
+      layout.tsx                # guard + <DashboardShell> (sidebar/topbar) for all /dashboard/*
+      dashboard/page.tsx        # /dashboard → redirects to the role home
+      dashboard/{student,tutor,admin}/
+        page.tsx                # thin async server wrapper: requireDashboardUser(role) → client component
+        _components/*.tsx       # the actual "use client" page bodies
   components/
-    ui/                         # shadcn components: button, input, avatar, dropdown-menu
+    ui/                         # shadcn components: button, input, avatar, dropdown-menu, table, badge, dialog, select, ...
     shared/                     # Navbar.tsx (server), NavbarClient.tsx (client), Footer.tsx
     home/                       # HeroBanner, FeaturedTuitions, PricingSection, HowItWorks, PlatformStatsAndSubjects
+    dashboard/                  # DashboardShell, StatCard, PageHeader, EmptyState, StatusBadge, ConfirmDialog, ...
+  config/
+    dashboardRoutes.ts          # sidebar links + roleHome per role (student/tutor/admin)
+  hooks/
+    useApi.ts                   # GET hook: { data, loading, error, refetch }
   lib/
+    api.ts                      # apiFetch() → NEXT_PUBLIC_API_URL with credentials: "include"
+    format.ts                   # currency/date helpers
     auth.ts                     # server better-auth config
     auth-client.ts              # createAuthClient → { authClient, signIn, signUp, useSession }
     core/serverUser.ts          # getSession() — server-only session lookup
+    core/dashboardAuth.ts       # requireDashboardUser(role?) — session + role guard, redirects
     uploadImage.ts              # ImgBB upload helper
-    types/                      # tUser, tTuition, tApplication, Payment, ...
+    types/                      # tUser, tTuition, tApplication, Payment, dashboard types, ...
     utils.ts                    # re-exports cn()
 public/                         # static assets (logo.png)
 ```
@@ -67,8 +81,16 @@ public/                         # static assets (logo.png)
 ## Routing — canonical auth URLs
 
 - Sign in is **`/signin`**, sign up is **`/signup`**. Never link to `/login`, `/sign-up`, or `/register` (legacy dead links, all removed).
-- **Exists today:** `/`, `/signin`, `/signup`, `/api/auth/*`
-- **Linked but not built yet (will 404):** `/tuitions`, `/tutors`, `/batches`, `/become-tutor`, `/pricing`, `/dashboard` (+ `/dashboard/profile`, `/dashboard/enrollments`), `/forgot-password`. Create the page before linking to a new route.
+- **Exists today:** `/`, `/signin`, `/signup`, `/api/auth/*`, `/dashboard` (+ all role pages below).
+- **`/dashboard` routes (all guarded by `requireDashboardUser`):** `/dashboard` redirects to the role home; `student`: `/dashboard/student`, `/dashboard/student/my-applications`; `tutor`: `/dashboard/tutor`, `/dashboard/tutor/post-tuition`, `/dashboard/tutor/my-tuitions`, `/dashboard/tutor/applicants`; `admin`: `/dashboard/admin`, `/dashboard/admin/users`, `/dashboard/admin/tuitions`, `/dashboard/admin/transactions`. Wrong role → 307 to that user's role home; no session → 307 to `/signin`.
+- **Linked but not built yet (will 404):** `/tuitions`, `/tutors`, `/batches`, `/become-tutor`, `/pricing`, `/dashboard/profile`, `/dashboard/enrollments`, `/forgot-password`. Create the page before linking to a new route.
+
+## Dashboard data flow (client → mentor-server)
+
+- Pages are thin async server wrappers (guard) around colocated `"use client"` components in `_components/`.
+- Client components read data with `useApi<T>(path)` and mutate with `apiFetch(path, opts)`; both hit `NEXT_PUBLIC_API_URL` (the Express backend, `http://localhost:5000`) with `credentials: "include"` so the better-auth session cookie is sent cross-origin. CORS on the server allows `CLIENT_ORIGINS` (localhost:3000/5173) with credentials.
+- The backend resolves the session from the **signed** `better-auth.session_token` cookie (it strips/verifies the HMAC suffix, then looks up `session` + `user` in `MentorLagbeDb`) and enforces `role` per route.
+- **Do not add a `loading.tsx` under `(dashboard)`** — a streamed shell makes the page-level `redirect()` (role guard) fall back to a client-side meta-refresh (200) instead of a proper 307. Loading/empty/error states are handled inside the client components via `useApi`.
 
 ## Auth architecture (better-auth)
 
@@ -91,8 +113,8 @@ Examples: `bg-background`, `text-heading`, `text-body`, `border-border-subtle`, 
 
 ## Environment variables (`.env` — names only, never commit values)
 
-- Defined: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `DB_URI`
-- Referenced but **missing** from `.env`: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (used in `src/lib/auth.ts`), `NEXT_PUBLIC_IMGBB_API_KEY` (used in `src/lib/uploadImage.ts`)
+- Defined: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `DB_URI`, `NEXT_PUBLIC_API_URL` (mentor-server base URL), `NEXT_PUBLIC_IMGBB_API_KEY` (ImgBB banner uploads)
+- Referenced but **missing** from `.env`: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (used in `src/lib/auth.ts`; Google sign-in is disabled until they're added — better-auth logs a warning, harmless)
 
 ## Conventions & gotchas
 
