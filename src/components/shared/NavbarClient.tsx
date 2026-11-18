@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { authClient } from "@/lib/auth-client";
+import { clearJwtCache } from "@/lib/api";
 
 interface NavbarUser {
   id?: string;
@@ -59,6 +60,8 @@ export default function NavbarClient({ user }: NavbarClientProps) {
     } catch (error) {
       console.error("Sign out error:", error);
     }
+    // সাইন-আউটে পুরনো JWT মেয়াদ শেষ না হওয়া পর্যন্ত কাজ করা বন্ধ করতে ক্যাশ বাতিল
+    clearJwtCache();
     router.push("/");
     router.refresh();
   };

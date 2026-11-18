@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signUp } from "@/lib/auth-client";
+import { clearJwtCache } from "@/lib/api";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -73,6 +74,9 @@ const handleSubmit = async (e: React.FormEvent) => {
       }
 
       console.log("Sign up successful:", data);
+
+      // নতুন অ্যাকাউন্টের টোকেন নতুন করে আনতে ক্যাশ বাতিল
+      clearJwtCache();
 
       router.push("/");
       router.refresh();

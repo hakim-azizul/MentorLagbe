@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, LogOut, Sparkles, ArrowRight } from "lucide-react";
 import { useSession, authClient } from "@/lib/auth-client";
+import { clearJwtCache } from "@/lib/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import {
@@ -51,6 +52,8 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
     } catch (error) {
       console.error("Sign out error:", error);
     }
+    // সাইন-আউটে পুরনো JWT মেয়াদ শেষ না হওয়া পর্যন্ত কাজ করা বন্ধ করতে ক্যাশ বাতিল
+    clearJwtCache();
     router.push("/");
     router.refresh();
   };

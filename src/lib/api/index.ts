@@ -6,7 +6,9 @@
  *   import { applyForTuition } from "@/lib/api/applicationApi";
  *
  * `@/lib/api` থেকে সাধারণ হেল্পারও পাওয়া যায় (apiFetch, ApiError, API_URL)।
+ * টোকেন ব্যবস্থা (getJwt/clearJwtCache) `./jwt`-এ — apiFetch নিজেই ব্যবহার করে।
  */
 export * from "./client";
+export * from "./jwt";
 export * from "./tuitionApi";
 export * from "./applicationApi";

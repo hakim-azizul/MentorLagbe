@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth"
+import { jwt } from "better-auth/plugins/jwt"
 import { MongoClient } from "mongodb"
 import { mongodbAdapter } from "@better-auth/mongo-adapter"
 
@@ -59,6 +60,18 @@ export const auth = betterAuth({
             clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
         },
     },
+    plugins: [
+        // mentor-server (Express) এই JWT টোকেন `Authorization: Bearer` হেডারে
+        // পায় ও JWKS (/api/auth/jwks) দিয়ে verify করে — issuer/audience মান
+        // দুই সার্ভারে (এখানে + mentor-server/.env) হুবহু মিলতে হবে।
+        jwt({
+            jwt: {
+                issuer: (process.env.BETTER_AUTH_URL || "http://localhost:3000").replace(/\/+$/, ""),
+                audience: (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, ""),
+                expirationTime: "15m",
+            },
+        }),
+    ],
     database: mongodbAdapter(db, {
         client,
     }),

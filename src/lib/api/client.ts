@@ -1,3 +1,5 @@
+import { clearJwtCache, getJwt } from "./jwt";
+
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -20,24 +22,47 @@ export type ApiOptions = {
 
 /**
  * mentor-server (NEXT_PUBLIC_API_URL) এ রিকোয়েস্ট পাঠায়।
- * credentials: "include" না দিলে বেটার-অথ সেশন কুকি যাবে না, তাই এটি বাধ্যতামূলক।
+ *
+ *  • `credentials: "include"` — ক্রস-অরিজিন কুকি যাওয়ার জন্য (সেশন-ভিত্তিক
+ *    Next.js কল ও ভবিষ্যতের কুকি ফ্লোর জন্য অক্ষত)।
+ *  • `Authorization: Bearer <JWT>` — mentor-server-এর প্রটেক্টেড রুট এই
+ *    টোকেন verify করে (JWKS); টোকেন না থাকলে (পাবলিক/সাইন-আউট) হেডার যায় না।
+ *  • ৪০১ এলে টোকেন একবার রিফ্রেশ করে রিট্রাই — মেয়াদোত্তীর্ণ টোকেনেও
+ *    ইউজার ব্লক হবে না।
  */
 export async function apiFetch<T>(
   path: string,
   options: ApiOptions = {}
 ): Promise<T> {
   const { method = "GET", body, signal } = options;
+  const requestBody = body !== undefined ? JSON.stringify(body) : undefined;
 
-  let response: Response;
-  try {
-    response = await fetch(`${API_URL}${path}`, {
+  const send = (token: string | null): Promise<Response> =>
+    fetch(`${API_URL}${path}`, {
       method,
       signal,
       credentials: "include",
-      headers:
-        body !== undefined ? { "Content-Type": "application/json" } : undefined,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      headers: {
+        ...(requestBody !== undefined
+          ? { "Content-Type": "application/json" }
+          : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: requestBody,
     });
+
+  let response: Response;
+  try {
+    const token = await getJwt();
+    response = await send(token);
+
+    if (response.status === 401 && token && !signal?.aborted) {
+      clearJwtCache();
+      const freshToken = await getJwt();
+      if (freshToken && freshToken !== token) {
+        response = await send(freshToken);
+      }
+    }
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") throw error;
     throw new ApiError(

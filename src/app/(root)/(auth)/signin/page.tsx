@@ -7,6 +7,7 @@ import { Mail, Lock, ArrowRight, Eye, EyeOff, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signIn } from "@/lib/auth-client";
+import { clearJwtCache } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -51,6 +52,9 @@ export default function LoginPage() {
       }
 
       console.log("Sign in successful:", data);
+
+      // পুরনো সাইন-আউট-আগের JWT ক্যাশ বাতিল — নতুন সেশনের টোকেনই যাবে
+      clearJwtCache();
 
       router.push("/");
       router.refresh();
