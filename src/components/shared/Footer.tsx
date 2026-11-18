@@ -194,7 +194,7 @@ export default function Footer() {
             <ul className="space-y-2.5 text-sm">
               <li>
                 <Link
-                  href="/sign-up"
+                  href="/signup"
                   className="hover:text-brand transition-colors"
                 >
                   Register as Student
@@ -202,7 +202,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/sign-up"
+                  href="/signup"
                   className="hover:text-brand transition-colors"
                 >
                   Become a Tutor
@@ -210,7 +210,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/login"
+                  href="/signin"
                   className="hover:text-brand transition-colors"
                 >
                   Sign In to Account

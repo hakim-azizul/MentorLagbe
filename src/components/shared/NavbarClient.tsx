@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Menu,
   X,
@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { authClient } from "@/lib/auth-client";
 
 interface NavbarUser {
   id?: string;
@@ -46,11 +47,19 @@ const navLinks = [
 export default function NavbarClient({ user }: NavbarClientProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const router = useRouter();
 
-  // আপনার BetterAuth signOut ফাংশনটি এখানে কল করবেন
   const handleLogout = async () => {
-    // উদাহরণ: await authClient.signOut();
-    console.log("Logging out...");
+    try {
+      const { error } = await authClient.signOut();
+      if (error) {
+        console.error("Sign out error:", error.message);
+      }
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
+    router.push("/");
+    router.refresh();
   };
 
   const getInitials = (name?: string | null) => {
@@ -107,7 +116,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
         <div className="hidden md:flex items-center gap-3">
           {!user ? (
             <>
-              <Link href="/login">
+              <Link href="/signin">
                 <Button
                   variant="ghost"
                   className="text-body hover:text-heading hover:bg-surface font-medium cursor-pointer"
@@ -115,7 +124,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                   Log in
                 </Button>
               </Link>
-              <Link href="/register">
+              <Link href="/signup">
                 <Button className="bg-brand hover:bg-brand-hover text-heading font-semibold shadow-xs transition-all cursor-pointer">
                   Get Started
                 </Button>
@@ -259,7 +268,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
           <div className="mt-4 border-t border-border-subtle pt-4">
             {!user ? (
               <div className="flex flex-col gap-2">
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/signin" onClick={() => setMobileMenuOpen(false)}>
                   <Button
                     variant="outline"
                     className="w-full border-border-subtle text-heading hover:bg-surface"
@@ -267,7 +276,10 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                     Log in
                   </Button>
                 </Link>
-                <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+                <Link
+                  href="/signup"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   <Button className="w-full bg-brand hover:bg-brand-hover text-heading font-semibold">
                     Get Started
                   </Button>

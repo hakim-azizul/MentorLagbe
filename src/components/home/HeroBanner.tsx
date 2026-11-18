@@ -135,7 +135,7 @@ export default function HeroBanner() {
                   <ArrowRight className="h-4 w-4 text-brand" />
                 </Button>
               </Link>
-              <Link href="/sign-up">
+              <Link href="/signup">
                 <Button
                   size="lg"
                   variant="outline"

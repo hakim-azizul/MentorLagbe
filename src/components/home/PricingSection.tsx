@@ -247,7 +247,7 @@ export default function PricingSection() {
                     {loadingPlan === plan.id ? "Redirecting..." : plan.ctaText}
                   </Button>
                 ) : (
-                  <Link href="/sign-up" className="block">
+                  <Link href="/signup" className="block">
                     <Button
                       variant="outline"
                       className="w-full border-border-subtle bg-background hover:bg-surface text-heading font-semibold py-6 rounded-xl cursor-pointer text-sm"
