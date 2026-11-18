@@ -18,6 +18,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -144,41 +145,41 @@ export default function NavbarClient({ user }: NavbarClientProps) {
               </Link>
 
               <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <button className="flex items-center gap-2 rounded-full border border-border-subtle bg-surface p-1 pr-2.5 transition hover:border-brand/50 focus:outline-none cursor-pointer">
-                    <Avatar className="h-8 w-8 border border-border-subtle">
-                      <AvatarImage
-                        src={user.image || ""}
-                        alt={user.name || "User"}
-                      />
-                      <AvatarFallback className="bg-brand-tint text-heading text-xs font-bold">
-                        {getInitials(user.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="max-w-25 truncate text-sm font-medium text-heading">
-                      {user.name?.split(" ")[0] || "Account"}
-                    </span>
-                    <ChevronDown className="h-3.5 w-3.5 text-body" />
-                  </button>
+                <DropdownMenuTrigger className="flex items-center gap-2 rounded-full border border-border-subtle bg-surface p-1 pr-2.5 transition hover:border-brand/50 focus:outline-none cursor-pointer">
+                  <Avatar className="h-8 w-8 border border-border-subtle">
+                    <AvatarImage
+                      src={user.image || ""}
+                      alt={user.name || "User"}
+                    />
+                    <AvatarFallback className="bg-brand-tint text-heading text-xs font-bold">
+                      {getInitials(user.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="max-w-25 truncate text-sm font-medium text-heading">
+                    {user.name?.split(" ")[0] || "Account"}
+                  </span>
+                  <ChevronDown className="h-3.5 w-3.5 text-body" />
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent
                   align="end"
                   className="w-56 border-border-subtle bg-background p-1.5 shadow-lg"
                 >
-                  <DropdownMenuLabel className="px-2 py-1.5">
-                    <p className="text-sm font-semibold text-heading truncate">
-                      {user.name || "MentorLagbe User"}
-                    </p>
-                    <p className="text-xs font-normal text-body truncate">
-                      {user.email}
-                    </p>
-                    {user.role && (
-                      <span className="mt-1 inline-block rounded-md bg-brand-tint px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-heading">
-                        {user.role}
-                      </span>
-                    )}
-                  </DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel className="px-2 py-1.5">
+                      <p className="text-sm font-semibold text-heading truncate">
+                        {user.name || "MentorLagbe User"}
+                      </p>
+                      <p className="text-xs font-normal text-body truncate">
+                        {user.email}
+                      </p>
+                      {user.role && (
+                        <span className="mt-1 inline-block rounded-md bg-brand-tint px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-heading">
+                          {user.role}
+                        </span>
+                      )}
+                    </DropdownMenuLabel>
+                  </DropdownMenuGroup>
 
                   <DropdownMenuSeparator className="bg-border-subtle" />
 
