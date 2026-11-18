@@ -12,7 +12,7 @@ export class ApiError extends Error {
   }
 }
 
-type ApiOptions = {
+export type ApiOptions = {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
   body?: unknown;
   signal?: AbortSignal;

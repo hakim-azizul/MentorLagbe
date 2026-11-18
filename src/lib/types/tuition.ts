@@ -1,3 +1,5 @@
+import type { tUserPlan } from "./user";
+
 export type tTuition = {
   _id: string;
   title: string;
@@ -34,4 +36,18 @@ export type tTuitionView = {
   tutorName: string;
   tutorEmail: string;
   createdAt: Date;
+};
+
+/** টিউশনার প্রোফাইল সামারি — GET /api/tuitions/:id থেকে populate হয়। */
+export type tTutorProfile = {
+  name: string;
+  email: string;
+  image: string;
+  bio: string;
+  plan: tUserPlan;
+};
+
+/** পাবলিক টিউশন ডিটেইলস পেজের payload (ফুল ডকুমেন্ট + টিউশনার সামারি)। */
+export type tTuitionDetails = tTuition & {
+  tutor: tTutorProfile;
 };
