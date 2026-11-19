@@ -12,3 +12,4 @@ export * from "./client";
 export * from "./jwt";
 export * from "./tuitionApi";
 export * from "./applicationApi";
+export * from "./userApi";

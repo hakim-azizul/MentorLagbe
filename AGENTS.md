@@ -61,6 +61,9 @@ src/
       dashboard/{student,tutor,admin}/
         page.tsx                # thin async server wrapper: requireDashboardUser(role) → client component
         _components/*.tsx       # the actual "use client" page bodies
+      dashboard/profile/
+        page.tsx                # /dashboard/profile — server wrapper: requireDashboardUser() → ProfileForm
+        _components/ProfileForm.tsx  # client form: fetch profile, ImgBB upload, PATCH save
   components/
     ui/                         # shadcn components: button, input, avatar, dropdown-menu, table, badge, dialog, select, ...
     shared/                     # Navbar.tsx (server), NavbarClient.tsx (client), Footer.tsx
@@ -77,6 +80,7 @@ src/
       jwt.ts                    # getJwt()/clearJwtCache() — Better Auth session JWT, in-memory cache
       tuitionApi.ts             # fetchApprovedTuitions(queryString?), fetchTuitionById(id)
       applicationApi.ts         # applyForTuition(payload), checkStudentApplication(tuitionId, email)
+      userApi.ts                # fetchCurrentUserProfile(), updateUserProfile(payload: tUserEdit)
     format.ts                   # currency/date helpers
     auth.ts                     # server better-auth config
     auth-client.ts              # createAuthClient → { authClient, signIn, signUp, useSession } (type-only auth import)
@@ -92,15 +96,16 @@ public/                         # static assets (logo.png)
 
 - Sign in is **`/signin`**, sign up is **`/signup`**. Never link to `/login`, `/sign-up`, or `/register` (legacy dead links, all removed).
 - **Exists today:** `/`, `/signin`, `/signup`, `/api/auth/*`, `/tuitions`, `/tuitions/[id]`, `/dashboard` (+ all role pages below).
-- **`/dashboard` routes (all guarded by `requireDashboardUser`):** `/dashboard` redirects to the role home; `student`: `/dashboard/student`, `/dashboard/student/my-applications`; `tutor`: `/dashboard/tutor`, `/dashboard/tutor/post-tuition`, `/dashboard/tutor/my-tuitions`, `/dashboard/tutor/applicants`; `admin`: `/dashboard/admin`, `/dashboard/admin/users`, `/dashboard/admin/tuitions`, `/dashboard/admin/transactions`. Wrong role → 307 to that user's role home; no session → 307 to `/signin`.
+- **`/dashboard` routes (all guarded by `requireDashboardUser`):** `/dashboard` redirects to the role home; any role: `/dashboard/profile` (view/edit own profile — no role gate); `student`: `/dashboard/student`, `/dashboard/student/my-applications`; `tutor`: `/dashboard/tutor`, `/dashboard/tutor/post-tuition`, `/dashboard/tutor/my-tuitions`, `/dashboard/tutor/applicants`; `admin`: `/dashboard/admin`, `/dashboard/admin/users`, `/dashboard/admin/tuitions`, `/dashboard/admin/transactions`. Wrong role → 307 to that user's role home; no session → 307 to `/signin`.
 - **`/tuitions` (public, route group `(root)` — no guard):** browse page fetches approved+active listings through the service layer; `/tuitions/[id]` renders details server-side (`notFound()` on 404) and resolves the apply flow client-side via `useSession()` (signed out → link to `/signin`; tutor/admin → notice; student → already-applied check + Dialog form).
-- **Linked but not built yet (will 404):** `/tutors`, `/batches`, `/become-tutor`, `/pricing`, `/dashboard/profile`, `/dashboard/enrollments`, `/forgot-password`. Create the page before linking to a new route.
+- **Linked but not built yet (will 404):** `/tutors`, `/batches`, `/become-tutor`, `/pricing`, `/dashboard/enrollments`, `/forgot-password`. Create the page before linking to a new route.
 
 ## Frontend API service layer (`src/lib/api/`)
 
 - **Rule: never scatter raw `fetch` inside UI components.** Import an async function from the service layer and `await` it instead.
 - `tuitionApi.ts` — `fetchApprovedTuitions(queryString?)` (`GET /api/tuitions`, e.g. `"search=phys&mode=Online"`), `fetchTuitionById(id)` (`GET /api/tuitions/:id`, throws `ApiError(404)` → page calls `notFound()`).
 - `applicationApi.ts` — `applyForTuition(payload)` (`POST /api/applications`; payload keys: `tuitionId, studentEmail, studentName, phone, preferredSchedule, note`), `checkStudentApplication(tuitionId, email)` (`GET /api/applications/check` → `{ hasApplied }`).
+- `userApi.ts` — `fetchCurrentUserProfile()` (`GET /api/profile` → `tUserProfile`, the `tUserEdit` fields plus `_id/role/plan/createdAt`; phone/bio aren't in the session so the profile form loads them here), `updateUserProfile(payload: tUserEdit)` (`PATCH /api/profile` → updated profile; backend whitelists the 5 editable fields — `role`/`plan` in the body are ignored). Type `tUserProfile = tUserEdit & { _id, role, plan, createdAt }`.
 - `client.ts` — `apiFetch<T>()` (shared fetch wrapper: `API_URL`, `credentials: "include"`, **`Authorization: Bearer <JWT>`** via `getJwt()`, one refresh-and-retry on `401`, JSON handling, throws `ApiError` with `.status`), `ApiError`, `API_URL`.
 - `jwt.ts` — the Better Auth → Express bridge: `getJwt()` calls `GET /api/auth/token` (signed session cookie required) and caches the JWT in memory (refreshed 30 s before `exp`, 15 s negative cache while signed out, shared inflight promise; always `null` during SSR so public server-side fetches just skip the header). `clearJwtCache()` runs on sign-in/sign-up/sign-out (`signin/signup` pages, `NavbarClient`, `DashboardShell`) and before every 401 retry.
 - `index.ts` is a barrel, so the legacy import path `@/lib/api` keeps working for `apiFetch`/`ApiError` (used by `useApi` and dashboard components).
@@ -108,7 +113,7 @@ public/                         # static assets (logo.png)
 
 ## mentor-server REST API (single-file `index.js`)
 
-All backend logic lives in **`../mentor-server/index.js`** (Express + native MongoDB driver, database `MentorLagbeDb`; auth collections are singular: `user`, `session`, `account`, `verification`, plus `jwks` for the signing keys; business collections plural: `tuitions`, `applications`, `payments`). Start with `node index.js` (port 5000). Regression suites (both need **Next.js on :3000 and Express on :5000 running**): `node scripts/smoke.mjs` (51 checks, must stay green — it mints real JWTs through `GET :3000/api/auth/token`) and `node scripts/e2e-bearer.mjs` (14 checks: real sign-up → JWT claims → user resync → DB-authoritative roles; self-cleaning).
+All backend logic lives in **`../mentor-server/index.js`** (Express + native MongoDB driver, database `MentorLagbeDb`; auth collections are singular: `user`, `session`, `account`, `verification`, plus `jwks` for the signing keys; business collections plural: `tuitions`, `applications`, `payments`). Start with `node index.js` (port 5000). Regression suites (both need **Next.js on :3000 and Express on :5000 running**): `node scripts/smoke.mjs` (59 checks, must stay green — it mints real JWTs through `GET :3000/api/auth/token`) and `node scripts/e2e-bearer.mjs` (14 checks: real sign-up → JWT claims → user resync → DB-authoritative roles; self-cleaning).
 
 **Public (no session required):**
 
@@ -117,7 +122,7 @@ All backend logic lives in **`../mentor-server/index.js`** (Express + native Mon
 - `POST /api/applications` — body `tuitionId, studentEmail, studentName, phone, preferredSchedule, note` → `201`; missing field → `400 "Please fill in: ..."`; applicant not `role: student` in `user` → `403 "Only students can apply for tuitions."`; duplicate (`tuitionId` + `studentEmail`) → `409 "You have already applied for this tuition."`. Stores `studentPhone`/`studentNote`, `status: "pending"`, `appliedAt`/`createdAt`.
 - `GET /api/applications/check?tuitionId=&email=` — → `{ hasApplied: boolean }` (`400` when a param is missing).
 
-**Bearer-JWT-guarded (`Authorization: Bearer <JWT>` from Better Auth, role enforced):** `POST|GET|PATCH|DELETE /api/tuitions` (owner-or-admin edits; `GET /api/tuitions/tutor`), `GET|PATCH|DELETE /api/applications` (`/student`, `/tutor`, `/:id/status`), `/api/dashboard/{student,tutor,admin}/stats`, `/api/admin/*` (users, tuitions, transactions).
+**Bearer-JWT-guarded (`Authorization: Bearer <JWT>` from Better Auth, role enforced):** `POST|GET|PATCH|DELETE /api/tuitions` (owner-or-admin edits; `GET /api/tuitions/tutor`), `GET|PATCH|DELETE /api/applications` (`/student`, `/tutor`, `/:id/status`), `/api/dashboard/{student,tutor,admin}/stats`, `/api/admin/*` (users, tuitions, transactions). **`GET|PATCH /api/profile`** — any authenticated role (no role gate): reads/updates only the caller's own `user` doc (identity from `req.user.id`), PATCH whitelists `name, email, image, phone, bio`, changed email is checked case-insensitively against other accounts (`409` on clash), missing name/email → `400`, returns `{ _id, name, email, image, phone, bio, role, plan, createdAt }`.
 
 **Middleware chain:** `verifyToken` (jose `jwtVerify` against the remote JWKS → sync/create the `user` doc → attach `req.user`; `401` missing/invalid/expired/wrong-issuer token, `503` JWKS unreachable) then a role gate — `verifyStudent` (`student`|`admin`), `verifyTutor` (`tutor`|`admin`), `verifyAdmin` (`admin`); admin passes every gate. The **database is authoritative for `role`/`plan`**: an existing user's values are never overwritten from token claims, so an admin role change applies even while the old JWT (15 min TTL) is still in flight. Config lives in `mentor-server/.env`: `JWT_ISSUER` (Better Auth origin, default `http://localhost:3000`), `JWT_AUDIENCE` (this API, default `http://localhost:5000`), `JWKS_URL` (`<issuer>/api/auth/jwks`) — must match the `jwt({ ... })` options in `src/lib/auth.ts`.
 
