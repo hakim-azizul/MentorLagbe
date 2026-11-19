@@ -13,3 +13,11 @@ export type tUser = {
 export type tUserRole = "student" | "tutor" | "admin";
 
 export type tUserPlan = "free" | "pro";
+
+export type tUserEdit= {
+  name: string;
+  email: string;
+  image: string;
+  phone: string;
+  bio: string;
+}
