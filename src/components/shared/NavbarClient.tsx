@@ -10,7 +10,6 @@ import {
   LayoutDashboard,
   User,
   LogOut,
-  BookOpen,
   ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,9 +40,7 @@ interface NavbarClientProps {
 
 const navLinks = [
   { name: "Home", href: "/" },
-  { name: "Find Tutors", href: "/tutors" },
-  { name: "Tuition Batches", href: "/batches" },
-  { name: "Become a Tutor", href: "/become-tutor" },
+  { name: "Tuition Batches", href: "/tuitions" },
 ];
 
 export default function NavbarClient({ user }: NavbarClientProps) {
@@ -143,7 +140,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                   className="border-border-subtle text-heading hover:bg-brand-tint hover:border-brand/40 gap-2 cursor-pointer"
                 >
                   <LayoutDashboard className="h-4 w-4 text-brand" />
-                  Dashboard
+                  {user?.role === "Student"? "My Class Room" : `${user?.role} Workspace`}
                 </Button>
               </Link>
 
@@ -188,31 +185,11 @@ export default function NavbarClient({ user }: NavbarClientProps) {
 
                   <DropdownMenuItem className="cursor-pointer focus:bg-surface">
                     <Link
-                      href="/dashboard"
-                      className="flex items-center gap-2 text-heading"
-                    >
-                      <LayoutDashboard className="h-4 w-4 text-body" />
-                      Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem className="cursor-pointer focus:bg-surface">
-                    <Link
                       href="/dashboard/profile"
                       className="flex items-center gap-2 text-heading"
                     >
                       <User className="h-4 w-4 text-body" />
                       My Profile
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem className="cursor-pointer focus:bg-surface">
-                    <Link
-                      href="/dashboard/enrollments"
-                      className="flex items-center gap-2 text-heading"
-                    >
-                      <BookOpen className="h-4 w-4 text-body" />
-                      My Tuitions
                     </Link>
                   </DropdownMenuItem>
 
@@ -320,6 +297,18 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                     >
                       <LayoutDashboard className="h-4 w-4 text-brand" />
                       Dashboard
+                    </Button>
+                  </Link>
+                  <Link
+                    href="/dashboard/profile"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Button
+                      variant="outline"
+                      className="w-full border-border-subtle text-heading gap-1.5"
+                    >
+                      <User className="h-4 w-4 text-body" />
+                      My Profile
                     </Button>
                   </Link>
                   <Button
