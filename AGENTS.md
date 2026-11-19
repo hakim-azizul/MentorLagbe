@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # MentorLagbe (mentor-client) — Agent Guide
 
-Frontend for **MentorLagbe**, a tuition & mentorship platform. This repo is the Next.js client app; auth is served by this app (App Router route handlers + better-auth), while the domain REST API (tuitions, applications, admin) lives in the sibling **`../mentor-server`** Express app (MongoDB, port 5000). The whole backend — DB access, session middleware and every route — is consolidated in a **single file: `../mentor-server/index.js`** (the old `mentor-server/src/` modules were removed).
+Frontend for **MentorLagbe**, a tuition & mentorship platform. This repo is the Next.js client app; auth is served by this app (App Router route handlers + better-auth), while the domain REST API (tuitions, applications, admin) lives in the sibling **`../mentor-server`** Express app (MongoDB, port 5000). The whole backend — DB access, session middleware and every route — is consolidated in a **single file: `../mentor-server/index.js`** (the old `mentor-server/src/` modules were removed; endpoints are registered directly on the Express `app` — `app.get("/api/...", verifyToken, ...)` — with no `express.Router()`). 
 
 ## Stack
 
@@ -113,7 +113,7 @@ public/                         # static assets (logo.png)
 
 ## mentor-server REST API (single-file `index.js`)
 
-All backend logic lives in **`../mentor-server/index.js`** (Express + native MongoDB driver, database `MentorLagbeDb`; auth collections are singular: `user`, `session`, `account`, `verification`, plus `jwks` for the signing keys; business collections plural: `tuitions`, `applications`, `payments`). Start with `node index.js` (port 5000). Regression suites (both need **Next.js on :3000 and Express on :5000 running**): `node scripts/smoke.mjs` (59 checks, must stay green — it mints real JWTs through `GET :3000/api/auth/token`) and `node scripts/e2e-bearer.mjs` (14 checks: real sign-up → JWT claims → user resync → DB-authoritative roles; self-cleaning).
+All backend logic lives in **`../mentor-server/index.js`** (Express + native MongoDB driver, database `MentorLagbeDb`; auth collections are singular: `user`, `session`, `account`, `verification`, plus `jwks` for the signing keys; business collections plural: `tuitions`, `applications`, `payments`). **Routes are registered directly on `app`** (`app.get("/api/tuitions", ...)`, `app.patch("/api/profile", verifyToken, ...)`) — there is no `express.Router()` and no mount step; the file reads top-to-bottom as: setup → auth middleware → dashboard stats → tuitions → applications → profile → admin → 404/error fallbacks → `app.listen`. Keep route paths fully qualified and preserve registration order (literal paths like `/api/tuitions/tutor` before `/api/tuitions/:id`). Start with `node index.js` (port 5000). Regression suites (both need **Next.js on :3000 and Express on :5000 running**): `node scripts/smoke.mjs` (59 checks, must stay green — it mints real JWTs through `GET :3000/api/auth/token`) and `node scripts/e2e-bearer.mjs` (14 checks: real sign-up → JWT claims → user resync → DB-authoritative roles; self-cleaning).
 
 **Public (no session required):**
 
