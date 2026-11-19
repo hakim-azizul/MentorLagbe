@@ -31,6 +31,13 @@ const dummyTuitions: tTuitionView[] = [
     description: "Comprehensive problem-solving and concept clearing sessions for HSC candidates.",
     tutorName: "Tanvir Ahmed",
     tutorEmail: "tanvir@example.com",
+    tutor: {
+      name: "Tanvir Ahmed",
+      email: "tanvir@example.com",
+      image: "",
+      bio: "",
+      plan: "free",
+    },
     createdAt: new Date(),
   },
   {
@@ -46,6 +53,13 @@ const dummyTuitions: tTuitionView[] = [
     description: "Dedicated 1-on-1 home tutoring focused on board exam preparation and weekly tests.",
     tutorName: "Sadia Sultana",
     tutorEmail: "sadia@example.com",
+    tutor: {
+      name: "Sadia Sultana",
+      email: "sadia@example.com",
+      image: "",
+      bio: "",
+      plan: "free",
+    },
     createdAt: new Date(),
   },
   {
@@ -60,6 +74,13 @@ const dummyTuitions: tTuitionView[] = [
     description: "Learn Next.js, Node.js, MongoDB, and build real-world production ready projects.",
     tutorName: "Azizul Hakim",
     tutorEmail: "hakim@example.com",
+    tutor: {
+      name: "Azizul Hakim",
+      email: "hakim@example.com",
+      image: "",
+      bio: "",
+      plan: "free",
+    },
     createdAt: new Date(),
   },
 ];

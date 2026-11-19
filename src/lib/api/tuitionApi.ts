@@ -8,13 +8,17 @@ import type { tTuitionDetails, tTuitionView } from "@/lib/types/tuition";
 
 /**
  * অনুমোদিত (approved) ও সক্রিয় (isActive) সব টিউশন আনে।
- * `queryString` উদাহরণ: `search=phys&subject=Physics&mode=Online`
+ * `queryString` উদাহরণ: `search=phys&subject=Physics&mode=Online&sort=fee_asc`
+ * — সার্চ/ফিল্টার/সর্ট URL প্যারামিটার থেকেই এসেছে (`/tuitions` পেজ)।
+ * `signal` দিলে আগের রিকোয়েস্টটি abort করা যায় (ফিল্টার দ্রুত বদলানোর সময়)।
+ * প্রতিটি আইটেমে `tutor` প্রোফাইল সামারি (image সহ) থাকে।
  */
 export async function fetchApprovedTuitions(
-  queryString?: string
+  queryString?: string,
+  signal?: AbortSignal
 ): Promise<tTuitionView[]> {
   const query = queryString ? `?${queryString}` : "";
-  return apiFetch<tTuitionView[]>(`/api/tuitions${query}`);
+  return apiFetch<tTuitionView[]>(`/api/tuitions${query}`, { signal });
 }
 
 /** একটি টিউশনের বিস্তারিত তথ্য + টিউশনার প্রোফাইল সামারি। 404 হলে ApiError ফেলে। */

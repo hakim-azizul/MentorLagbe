@@ -22,6 +22,15 @@ export type tapprovalStatus = "pending" | "approved" | "rejected";
 
 export type tmode = "Online" | "Offline" | "Hybrid";
 
+/** টিউশনার প্রোফাইল সামারি — GET /api/tuitions ও GET /api/tuitions/:id দুটোই populate করে। */
+export type tTutorProfile = {
+  name: string;
+  email: string;
+  image: string;
+  bio: string;
+  plan: tUserPlan;
+};
+
 export type tTuitionView = {
   _id: string;
   title: string;
@@ -35,16 +44,9 @@ export type tTuitionView = {
   description: string;
   tutorName: string;
   tutorEmail: string;
+  /** টিউশনার প্রোফাইল সামারি — কার্ডের অ্যাভাটার/নাম রেন্ডার করে। */
+  tutor: tTutorProfile;
   createdAt: Date;
-};
-
-/** টিউশনার প্রোফাইল সামারি — GET /api/tuitions/:id থেকে populate হয়। */
-export type tTutorProfile = {
-  name: string;
-  email: string;
-  image: string;
-  bio: string;
-  plan: tUserPlan;
 };
 
 /** পাবলিক টিউশন ডিটেইলস পেজের payload (ফুল ডকুমেন্ট + টিউশনার সামারি)। */

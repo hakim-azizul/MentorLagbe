@@ -50,7 +50,9 @@ src/
       (auth)/
         signin/page.tsx         # route: /signin  (client component)
         signup/page.tsx         # route: /signup  (client component)
-      tuitions/page.tsx         # /tuitions — browse + filter bar (client component)
+      tuitions/page.tsx         # /tuitions — server: metadata + Suspense shell (useSearchParams boundary)
+      tuitions/_components/
+        BrowseTuitions.tsx      # client: URL query-param search/filter/sort + result cards (tutor avatar)
       tuitions/[id]/page.tsx    # /tuitions/[id] — server: fetch + notFound() on 404
       tuitions/[id]/_components/
         TuitionDetails.tsx      # 2-column layout, sticky fee + tutor card
@@ -78,7 +80,7 @@ src/
       index.ts                  # barrel — `@/lib/api` re-exports everything below
       client.ts                 # apiFetch()/ApiError/API_URL → NEXT_PUBLIC_API_URL + Bearer JWT (401 → refresh once & retry)
       jwt.ts                    # getJwt()/clearJwtCache() — Better Auth session JWT, in-memory cache
-      tuitionApi.ts             # fetchApprovedTuitions(queryString?), fetchTuitionById(id)
+      tuitionApi.ts             # fetchApprovedTuitions(queryString?, signal?), fetchTuitionById(id)
       applicationApi.ts         # applyForTuition(payload), checkStudentApplication(tuitionId, email)
       userApi.ts                # fetchCurrentUserProfile(), updateUserProfile(payload: tUserEdit)
     format.ts                   # currency/date helpers
@@ -97,13 +99,13 @@ public/                         # static assets (logo.png)
 - Sign in is **`/signin`**, sign up is **`/signup`**. Never link to `/login`, `/sign-up`, or `/register` (legacy dead links, all removed).
 - **Exists today:** `/`, `/signin`, `/signup`, `/api/auth/*`, `/tuitions`, `/tuitions/[id]`, `/dashboard` (+ all role pages below).
 - **`/dashboard` routes (all guarded by `requireDashboardUser`):** `/dashboard` redirects to the role home; any role: `/dashboard/profile` (view/edit own profile — no role gate); `student`: `/dashboard/student`, `/dashboard/student/my-applications`; `tutor`: `/dashboard/tutor`, `/dashboard/tutor/post-tuition`, `/dashboard/tutor/my-tuitions`, `/dashboard/tutor/applicants`; `admin`: `/dashboard/admin`, `/dashboard/admin/users`, `/dashboard/admin/tuitions`, `/dashboard/admin/transactions`. Wrong role → 307 to that user's role home; no session → 307 to `/signin`.
-- **`/tuitions` (public, route group `(root)` — no guard):** browse page fetches approved+active listings through the service layer; `/tuitions/[id]` renders details server-side (`notFound()` on 404) and resolves the apply flow client-side via `useSession()` (signed out → link to `/signin`; tutor/admin → notice; student → already-applied check + Dialog form).
+- **`/tuitions` (public, route group `(root)` — no guard):** search/filter/sort state lives in the **URL query params** (`search`, `subject`, `classLevel`, `mode`, `sort`) so refresh/share/back-forward all reproduce the same view. `page.tsx` is a thin server component (metadata + `Suspense` boundary — required for `useSearchParams`) around the client `BrowseTuitions.tsx`, which reads params with `useSearchParams`, writes them via `router.replace(..., { scroll: false })` (search input debounced 300 ms into the URL; `ALL_OPTION`/"Clear" just remove params; default `sort=newest` is never written), and re-fetches whenever params change (stale requests cancelled with `AbortController`). Params go to `fetchApprovedTuitions()` → `GET /api/tuitions`, where MongoDB filters + sorts. `/tuitions/[id]` renders details server-side (`notFound()` on 404) and resolves the apply flow client-side via `useSession()` (signed out → link to `/signin`; tutor/admin → notice; student → already-applied check + Dialog form).
 - **Linked but not built yet (will 404):** `/tutors`, `/batches`, `/become-tutor`, `/pricing`, `/dashboard/enrollments`, `/forgot-password`. Create the page before linking to a new route.
 
 ## Frontend API service layer (`src/lib/api/`)
 
 - **Rule: never scatter raw `fetch` inside UI components.** Import an async function from the service layer and `await` it instead.
-- `tuitionApi.ts` — `fetchApprovedTuitions(queryString?)` (`GET /api/tuitions`, e.g. `"search=phys&mode=Online"`), `fetchTuitionById(id)` (`GET /api/tuitions/:id`, throws `ApiError(404)` → page calls `notFound()`).
+- `tuitionApi.ts` — `fetchApprovedTuitions(queryString?, signal?)` (`GET /api/tuitions`, e.g. `"search=phys&mode=Online&sort=fee_asc"`; the optional `AbortSignal` lets the browse page cancel stale requests when params change; every item includes the populated `tutor` summary with `image` for the card avatar), `fetchTuitionById(id)` (`GET /api/tuitions/:id`, throws `ApiError(404)` → page calls `notFound()`).
 - `applicationApi.ts` — `applyForTuition(payload)` (`POST /api/applications`; payload keys: `tuitionId, studentEmail, studentName, phone, preferredSchedule, note`), `checkStudentApplication(tuitionId, email)` (`GET /api/applications/check` → `{ hasApplied }`).
 - `userApi.ts` — `fetchCurrentUserProfile()` (`GET /api/profile` → `tUserProfile`, the `tUserEdit` fields plus `_id/role/plan/createdAt`; phone/bio aren't in the session so the profile form loads them here), `updateUserProfile(payload: tUserEdit)` (`PATCH /api/profile` → updated profile; backend whitelists the 5 editable fields — `role`/`plan` in the body are ignored). Type `tUserProfile = tUserEdit & { _id, role, plan, createdAt }`.
 - `client.ts` — `apiFetch<T>()` (shared fetch wrapper: `API_URL`, `credentials: "include"`, **`Authorization: Bearer <JWT>`** via `getJwt()`, one refresh-and-retry on `401`, JSON handling, throws `ApiError` with `.status`), `ApiError`, `API_URL`.
@@ -113,11 +115,11 @@ public/                         # static assets (logo.png)
 
 ## mentor-server REST API (single-file `index.js`)
 
-All backend logic lives in **`../mentor-server/index.js`** (Express + native MongoDB driver, database `MentorLagbeDb`; auth collections are singular: `user`, `session`, `account`, `verification`, plus `jwks` for the signing keys; business collections plural: `tuitions`, `applications`, `payments`). **Routes are registered directly on `app`** (`app.get("/api/tuitions", ...)`, `app.patch("/api/profile", verifyToken, ...)`) — there is no `express.Router()` and no mount step; the file reads top-to-bottom as: setup → auth middleware → dashboard stats → tuitions → applications → profile → admin → 404/error fallbacks → `app.listen`. Keep route paths fully qualified and preserve registration order (literal paths like `/api/tuitions/tutor` before `/api/tuitions/:id`). Start with `node index.js` (port 5000). Regression suites (both need **Next.js on :3000 and Express on :5000 running**): `node scripts/smoke.mjs` (59 checks, must stay green — it mints real JWTs through `GET :3000/api/auth/token`) and `node scripts/e2e-bearer.mjs` (14 checks: real sign-up → JWT claims → user resync → DB-authoritative roles; self-cleaning).
+All backend logic lives in **`../mentor-server/index.js`** (Express + native MongoDB driver, database `MentorLagbeDb`; auth collections are singular: `user`, `session`, `account`, `verification`, plus `jwks` for the signing keys; business collections plural: `tuitions`, `applications`, `payments`). **Routes are registered directly on `app`** (`app.get("/api/tuitions", ...)`, `app.patch("/api/profile", verifyToken, ...)`) — there is no `express.Router()` and no mount step; the file reads top-to-bottom as: setup → auth middleware → dashboard stats → tuitions → applications → profile → admin → 404/error fallbacks → `app.listen`. Keep route paths fully qualified and preserve registration order (literal paths like `/api/tuitions/tutor` before `/api/tuitions/:id`). Start with `node index.js` (port 5000). Regression suites (both need **Next.js on :3000 and Express on :5000 running**): `node scripts/smoke.mjs` (66 checks, must stay green — it mints real JWTs through `GET :3000/api/auth/token`) and `node scripts/e2e-bearer.mjs` (14 checks: real sign-up → JWT claims → user resync → DB-authoritative roles; self-cleaning).
 
 **Public (no session required):**
 
-- `GET /api/tuitions` — approved + active listings, newest first. Optional query params: `search` (case-insensitive regex over `title`/`subject`, escaped), `subject`, `classLevel`, `mode`.
+- `GET /api/tuitions` — approved + active listings. Optional query params: `search` (case-insensitive regex over `title`/`subject`, escaped), `subject`, `classLevel`, `mode`, `sort` (`newest` | `oldest` | `fee_asc` | `fee_desc`; unknown value → newest; applied inside the DB query). Every item carries a populated `tutor` summary (`name`, `email`, `image`, `bio`, `plan` — one bulk `user` lookup via the shared `tutorSummary()` helper, same shape as `GET /api/tuitions/:id`) so the browse cards render the tutor avatar.
 - `GET /api/tuitions/:id` — single tuition + populated `tutor` summary (`name`, `email`, `image`, `bio`, `plan` from the `user` collection). Invalid/unknown id → `404`.
 - `POST /api/applications` — body `tuitionId, studentEmail, studentName, phone, preferredSchedule, note` → `201`; missing field → `400 "Please fill in: ..."`; applicant not `role: student` in `user` → `403 "Only students can apply for tuitions."`; duplicate (`tuitionId` + `studentEmail`) → `409 "You have already applied for this tuition."`. Stores `studentPhone`/`studentNote`, `status: "pending"`, `appliedAt`/`createdAt`.
 - `GET /api/applications/check?tuitionId=&email=` — → `{ hasApplied: boolean }` (`400` when a param is missing).
