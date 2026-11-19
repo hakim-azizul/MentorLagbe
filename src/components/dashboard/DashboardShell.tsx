@@ -24,7 +24,10 @@ interface DashboardShellProps {
 
 const VALID_ROLES: tUserRole[] = ["student", "tutor", "admin"];
 
-export default function DashboardShell({ user, children }: DashboardShellProps) {
+export default function DashboardShell({
+  user,
+  children,
+}: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -35,9 +38,9 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
 
   const rawRole = (sessionUser?.role ?? user.role) as tUserRole;
   const role: tUserRole = VALID_ROLES.includes(rawRole) ? rawRole : "student";
-  const plan = ((sessionUser?.plan ?? user.plan) === "pro"
-    ? "pro"
-    : "free") as tUserPlan;
+  const plan = (
+    (sessionUser?.plan ?? user.plan) === "pro" ? "pro" : "free"
+  ) as tUserPlan;
 
   const links = dashboardRoutes[role] ?? dashboardRoutes.student;
 
@@ -86,13 +89,13 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
               "group flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium transition-colors",
               active
                 ? "bg-brand-tint text-heading font-semibold shadow-xs"
-                : "text-body hover:bg-surface hover:text-heading"
+                : "text-body hover:bg-surface hover:text-heading",
             )}
           >
             <Icon
               className={cn(
                 "h-4 w-4 shrink-0 transition-colors",
-                active ? "text-brand" : "text-body group-hover:text-brand"
+                active ? "text-brand" : "text-body group-hover:text-brand",
               )}
               aria-hidden="true"
             />
@@ -117,7 +120,7 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
             "rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider",
             plan === "pro"
               ? "bg-brand text-heading"
-              : "border border-border-subtle bg-background text-body"
+              : "border border-border-subtle bg-background text-body",
           )}
         >
           {plan}
@@ -145,27 +148,33 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
         <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between border-r border-border-subtle bg-background p-4 lg:flex">
           <div className="space-y-6">
             <Link href="/" className="flex items-center gap-2.5 px-1.5">
-              <Image src="/logo.png" alt="MentorLagbe" width={28} height={28} className="object-contain" priority />
+              <Image
+                src="/logo.png"
+                alt="MentorLagbe"
+                width={28}
+                height={28}
+                className="object-contain"
+                priority
+              />
               <span className="text-lg font-bold tracking-tight text-heading">
                 Mentor<span className="text-brand">Lagbe</span>
               </span>
             </Link>
-
-            <div className="rounded-2xl border border-border-subtle bg-surface px-3.5 py-2.5">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-body">
-                {dashboardTitles[role]}
-              </p>
+            <div>
+              <div className="h-0.5 w-full bg-brand" />
             </div>
 
             {nav}
-
-            {planCard}
+            {user?.role !== "admin" && planCard}
           </div>
 
           <div className="space-y-3">
             <div className="flex items-center gap-3 rounded-2xl border border-border-subtle bg-surface p-3">
               <Avatar className="h-9 w-9 border border-border-subtle">
-                <AvatarImage src={identity.image || ""} alt={identity.name || "User"} />
+                <AvatarImage
+                  src={identity.image || ""}
+                  alt={identity.name || "User"}
+                />
                 <AvatarFallback className="bg-brand-tint text-xs font-bold text-heading">
                   {getInitials(identity.name)}
                 </AvatarFallback>
@@ -191,7 +200,7 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
 
         {/* Main column */}
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-3 border-b border-border-subtle bg-background/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+          <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-3 border-b border-heading/30 bg-background/90 px-4 backdrop-blur-3xl sm:px-6 lg:px-8">
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -208,34 +217,25 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
                 </span>
               </Link>
 
-              <p className="hidden text-sm font-semibold text-body lg:block">
+              <p className="hidden text-xl font-bold text-heading lg:block">
                 {dashboardTitles[role]}
               </p>
             </div>
-
-            <div className="flex items-center gap-3">
-              <span
-                className={cn(
-                  "hidden rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider sm:inline-block",
-                  plan === "pro"
-                    ? "bg-brand text-heading"
-                    : "border border-border-subtle bg-surface text-body"
-                )}
-              >
-                {plan} plan
-              </span>
-
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="inline-flex items-center gap-2 rounded-xl border border-border-subtle bg-background px-3 py-2 text-xs font-semibold text-heading transition-colors hover:bg-brand-tint cursor-pointer"
-              >
-                <LogOut className="h-3.5 w-3.5 text-body" />
-                <span className="hidden sm:inline">Log out</span>
-              </button>
-            </div>
+            {user?.role !== "admin" && (
+              <div>
+                <span
+                  className={cn(
+                    "hidden rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider sm:inline-block",
+                    plan === "pro"
+                      ? "bg-brand text-heading"
+                      : "border border-border-subtle bg-surface text-body",
+                  )}
+                >
+                  {plan} plan
+                </span>
+              </div>
+            )}
           </header>
-
           <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
         </div>
       </div>
@@ -256,7 +256,12 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
                   onClick={() => setMobileOpen(false)}
                   className="flex items-center gap-2"
                 >
-                  <Image src="/logo.png" alt="MentorLagbe" width={26} height={26} />
+                  <Image
+                    src="/logo.png"
+                    alt="MentorLagbe"
+                    width={26}
+                    height={26}
+                  />
                   <span className="text-base font-bold text-heading">
                     Mentor<span className="text-brand">Lagbe</span>
                   </span>
@@ -273,7 +278,10 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
 
               <div className="flex items-center gap-3 rounded-2xl border border-border-subtle bg-surface p-3">
                 <Avatar className="h-9 w-9 border border-border-subtle">
-                  <AvatarImage src={identity.image || ""} alt={identity.name || "User"} />
+                  <AvatarImage
+                    src={identity.image || ""}
+                    alt={identity.name || "User"}
+                  />
                   <AvatarFallback className="bg-brand-tint text-xs font-bold text-heading">
                     {getInitials(identity.name)}
                   </AvatarFallback>
@@ -287,7 +295,7 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
               </div>
 
               {nav}
-              {planCard}
+              {user?.role !== "admin" && planCard}
             </div>
 
             <button

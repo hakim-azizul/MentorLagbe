@@ -66,6 +66,6 @@ export const dashboardRoutes: Record<tUserRole, DashboardRoute[]> = {
 /** ড্যাশবোর্ড সাইডবারের ব্র্যান্ড টাইটেল */
 export const dashboardTitles: Record<tUserRole, string> = {
   student: "Student Dashboard",
-  tutor: "Tutor Dashboard",
+  tutor: "Tutor Workspace",
   admin: "Admin Panel",
 };

@@ -14,7 +14,7 @@ if (!dbUri) {
 const client = new MongoClient(dbUri)
 const db = client.db("MentorLagbeDb")
 
-// বুটস্ট্র্যাপেই কানেকশন যাচাই — অসুবিধা হলে লগে স্পষ্ট করে জানাবে (non-blocking)
+// কানেকশন যাচাই — অসুবিধা হলে লগে স্পষ্ট করে জানাবে (non-blocking)
 client.connect().then(
     () => console.log("[auth] MongoDB connected"),
     (error) => console.error("[auth] MongoDB connection failed:", error)
