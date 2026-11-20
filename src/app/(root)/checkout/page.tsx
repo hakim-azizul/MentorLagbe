@@ -77,7 +77,7 @@ export default async function CheckoutSuccessPage({
                     <ArrowLeft aria-hidden className="size-6" />
                 </Link>
                 <Link href="/" className="font-heading text-lg font-bold text-white">
-                    Hireloop
+                    MentorLagbe
                 </Link>
             </header>
 
@@ -103,7 +103,7 @@ export default async function CheckoutSuccessPage({
                     </p>
 
                     <h1 className="mt-4 text-[22px] font-semibold tracking-[-0.02em] text-[#EDEDEF]">
-                        Welcome to Hireloop Pro
+                        Welcome to MentorLagbe Pro
                     </h1>
 
                     <p className="mx-auto mt-5 max-w-91.5 text-base leading-6.5 text-[#9ca3af]">
