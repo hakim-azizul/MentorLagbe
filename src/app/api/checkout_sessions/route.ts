@@ -18,7 +18,7 @@ export async function POST() {
       line_items: [
         {
           // Provide the exact Price ID (for example, price_1234) of the product you want to sell
-          price: 'price_1UaKaED6WtaE938Qhj7bh8BD',
+          price: 'price_1UdlMK7JO0jfKzLllhKjUHLp',
           quantity: 1,
         },
       ],
@@ -29,7 +29,7 @@ export async function POST() {
       },
       success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       // Provide a name (for example, hosted_web_0001) to label this Checkout integration and measure its conversion independently
-      integration_identifier: 'hire_loop_web_001',
+      integration_identifier: 'mentor_lagbe_web_001',
     });
     return NextResponse.redirect(session.url as string, 303)
   } catch (err) {
