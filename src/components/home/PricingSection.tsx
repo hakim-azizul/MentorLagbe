@@ -11,7 +11,7 @@ import {
   BookOpen,
   CreditCard,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 type AudienceTab = "student" | "tutor";
 
@@ -224,20 +224,26 @@ export default function PricingSection() {
               {/* Action CTA Button */}
               <div className="mt-8 pt-4">
                 {plan.isPro ? (
-                  <Link href="/payment" className="block">
-                    <Button className="w-full bg-brand hover:bg-brand-hover text-heading font-bold py-6 rounded-xl shadow-sm transition-all gap-2 cursor-pointer text-sm">
-                      <CreditCard className="h-4 w-4" />
-                      {plan.ctaText}
-                    </Button>
+                  <Link
+                    href="/payment"
+                    className={buttonVariants({
+                      className:
+                        "w-full bg-brand hover:bg-brand-hover text-heading font-bold py-6 rounded-xl shadow-sm transition-all gap-2 cursor-pointer text-sm",
+                    })}
+                  >
+                    <CreditCard className="h-4 w-4" />
+                    {plan.ctaText}
                   </Link>
                 ) : (
-                  <Link href="/signup" className="block">
-                    <Button
-                      variant="outline"
-                      className="w-full border-border-subtle bg-background hover:bg-surface text-heading font-semibold py-6 rounded-xl cursor-pointer text-sm"
-                    >
-                      {plan.ctaText}
-                    </Button>
+                  <Link
+                    href="/signup"
+                    className={buttonVariants({
+                      variant: "outline",
+                      className:
+                        "w-full border-border-subtle bg-background hover:bg-surface text-heading font-semibold py-6 rounded-xl cursor-pointer text-sm",
+                    })}
+                  >
+                    {plan.ctaText}
                   </Link>
                 )}
               </div>

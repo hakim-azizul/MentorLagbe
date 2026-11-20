@@ -142,6 +142,7 @@ export default function FeaturedTuitions({
                         }
                         alt={item.title}
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       {/* Mode Badge (Online / Offline) */}
@@ -212,6 +213,7 @@ export default function FeaturedTuitions({
                               src={tutorImage}
                               alt={tutorName}
                               fill
+                              sizes="36px"
                               className="object-cover"
                             />
                           </div>
