@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -10,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { tTuitionView } from "@/lib/types/tuition";
+import { fetchApprovedTuitions } from "@/lib/api/tuitionApi";
 
 export type tmode = "Online" | "Offline";
 
@@ -17,81 +20,51 @@ interface FeaturedTuitionsProps {
   tuitions?: tTuitionView[];
 }
 
-// ৩টি ডামি ডেটা (API ইন্টিগ্রেট করার আগে প্রিভিউ দেখার জন্য)
-const dummyTuitions: tTuitionView[] = [
-  {
-    _id: "1",
-    title: "HSC Advanced Physics & Higher Math Care Batch",
-    subject: "Physics & Math",
-    classLevel: "HSC 2nd Year",
-    mode: "Online",
-    monthlyFee: 2500,
-    daysPerWeek: 3,
-    bannerImage: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&auto=format&fit=crop&q=80",
-    description: "Comprehensive problem-solving and concept clearing sessions for HSC candidates.",
-    tutorName: "Tanvir Ahmed",
-    tutorEmail: "tanvir@example.com",
-    tutor: {
-      name: "Tanvir Ahmed",
-      email: "tanvir@example.com",
-      image: "",
-      bio: "",
-      plan: "free",
-    },
-    createdAt: new Date(),
-  },
-  {
-    _id: "2",
-    title: "Class 10 General Math & Science Home Tuition",
-    subject: "General Science",
-    classLevel: "SSC Class 10",
-    mode: "Offline",
-    location: "Dhanmondi, Dhaka",
-    monthlyFee: 4000,
-    daysPerWeek: 4,
-    bannerImage: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80",
-    description: "Dedicated 1-on-1 home tutoring focused on board exam preparation and weekly tests.",
-    tutorName: "Sadia Sultana",
-    tutorEmail: "sadia@example.com",
-    tutor: {
-      name: "Sadia Sultana",
-      email: "sadia@example.com",
-      image: "",
-      bio: "",
-      plan: "free",
-    },
-    createdAt: new Date(),
-  },
-  {
-    _id: "3",
-    title: "Complete Full-Stack Web Development Mentorship",
-    subject: "Programming",
-    classLevel: "University / Beginners",
-    mode: "Online",
-    monthlyFee: 3500,
-    daysPerWeek: 2,
-    bannerImage: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&auto=format&fit=crop&q=80",
-    description: "Learn Next.js, Node.js, MongoDB, and build real-world production ready projects.",
-    tutorName: "Azizul Hakim",
-    tutorEmail: "hakim@example.com",
-    tutor: {
-      name: "Azizul Hakim",
-      email: "hakim@example.com",
-      image: "",
-      bio: "",
-      plan: "free",
-    },
-    createdAt: new Date(),
-  },
-];
+const MAX_FEATURED = 6;
 
 export default function FeaturedTuitions({
-  tuitions = dummyTuitions,
+  tuitions: initialTuitions,
 }: FeaturedTuitionsProps) {
+  const hasInitialTuitions = Array.isArray(initialTuitions);
+  const [tuitions, setTuitions] = useState<tTuitionView[]>(() =>
+    hasInitialTuitions ? initialTuitions.slice(0, MAX_FEATURED) : []
+  );
+  const [loading, setLoading] = useState<boolean>(!hasInitialTuitions);
+
+  useEffect(() => {
+    if (hasInitialTuitions) {
+      return;
+    }
+
+    const controller = new AbortController();
+    let active = true;
+
+    fetchApprovedTuitions(`limit=${MAX_FEATURED}`, controller.signal)
+      .then((list) => {
+        if (!active) return;
+        setTuitions(Array.isArray(list) ? list.slice(0, MAX_FEATURED) : []);
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        if ((error as { name?: string })?.name === "AbortError") return;
+        console.error("Failed to fetch featured tuitions:", error);
+        setTuitions([]);
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [hasInitialTuitions]);
+
   return (
     <section className="bg-surface py-16 sm:py-24 border-b border-border-subtle">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
@@ -117,114 +90,166 @@ export default function FeaturedTuitions({
           </Link>
         </div>
 
-        {/* Tuitions Grid (Equal Height & Width Cards) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {tuitions.map((item) => (
-            <div
-              key={item._id}
-              className="group flex flex-col justify-between rounded-3xl border border-border-subtle bg-background overflow-hidden shadow-xs transition-all duration-300 hover:shadow-xl hover:border-brand/40"
-            >
-              {/* Card Top: Banner Image & Badges */}
-              <div>
-                <div className="relative h-48 w-full overflow-hidden bg-surface">
-                  <Image
-                    src={item.bannerImage}
-                    alt={item.title}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  {/* Mode Badge (Online / Offline) */}
-                  <div className="absolute top-3 left-3">
-                    <span
-                      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-bold shadow-sm ${
-                        item.mode === "Online"
-                          ? "bg-brand text-heading"
-                          : "bg-heading text-background"
-                      }`}
-                    >
-                      {item.mode === "Online" ? (
-                        <Video className="h-3.5 w-3.5" />
-                      ) : (
-                        <MapPin className="h-3.5 w-3.5 text-brand" />
-                      )}
-                      {item.mode}
-                    </span>
-                  </div>
-
-                  {/* Class Level Badge */}
-                  <div className="absolute top-3 right-3">
-                    <span className="rounded-lg bg-background/90 backdrop-blur-md px-2.5 py-1 text-xs font-semibold text-heading shadow-xs">
-                      {item.classLevel}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Card Body Info */}
-                <div className="p-6 space-y-3">
-                  <div className="flex items-center justify-between text-xs font-medium text-body">
-                    <span className="text-brand font-semibold uppercase tracking-wider">
-                      {item.subject}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3.5 w-3.5 text-body" />
-                      {item.daysPerWeek} days/week
-                    </span>
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-lg font-bold text-heading line-clamp-2 group-hover:text-brand transition-colors">
-                    {item.title}
-                  </h3>
-
-                  {/* Location or Mode Details */}
-                  {item.mode === "Offline" && item.location && (
-                    <p className="flex items-center gap-1.5 text-xs text-body">
-                      <MapPin className="h-3.5 w-3.5 text-brand shrink-0" />
-                      <span className="truncate">{item.location}</span>
-                    </p>
-                  )}
-
-                  {/* Description */}
-                  <p className="text-sm text-body line-clamp-2">
-                    {item.description}
-                  </p>
-                </div>
+        {/* Loading / Empty / Data States */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Array.from({ length: MAX_FEATURED }).map((_, idx) => (
+              <div
+                key={idx}
+                className="h-96 rounded-3xl border border-border-subtle bg-background animate-pulse p-6 space-y-4"
+              >
+                <div className="h-44 rounded-2xl bg-surface" />
+                <div className="h-4 w-1/3 rounded bg-surface" />
+                <div className="h-6 w-4/5 rounded bg-surface" />
+                <div className="h-4 w-full rounded bg-surface" />
               </div>
+            ))}
+          </div>
+        ) : tuitions.length === 0 ? (
+          <div className="rounded-3xl border border-border-subtle bg-background p-10 text-center">
+            <p className="text-base font-semibold text-heading">
+              No featured tuitions available right now.
+            </p>
+            <p className="mt-1 text-sm text-body">
+              Please check back later or browse all active tuition listings.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {tuitions.slice(0, MAX_FEATURED).map((item) => {
+              const tutorName = item.tutor?.name || item.tutorName || "Tutor";
+              const tutorImage = item.tutor?.image || "";
+              const initials = tutorName
+                .split(" ")
+                .filter(Boolean)
+                .map((n) => n[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase();
 
-              {/* Card Footer: Tutor Info, Price & View Details Button */}
-              <div className="p-6 pt-0 mt-auto space-y-4">
-                <div className="border-t border-border-subtle pt-4 flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-tint text-heading font-bold text-xs border border-brand/20">
-                      {item.tutorName.split(" ").map(n => n[0]).join("").slice(0, 2)}
+              return (
+                <div
+                  key={item._id}
+                  className="group flex flex-col justify-between rounded-3xl border border-border-subtle bg-background overflow-hidden shadow-xs transition-all duration-300 hover:shadow-xl hover:border-brand/40"
+                >
+                  {/* Card Top: Banner Image & Badges */}
+                  <div>
+                    <div className="relative h-48 w-full overflow-hidden bg-surface">
+                      <Image
+                        src={
+                          item.bannerImage ||
+                          "https://i.ibb.co/Q7T1d591/Grow-the-community.png"
+                        }
+                        alt={item.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      {/* Mode Badge (Online / Offline) */}
+                      <div className="absolute top-3 left-3">
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-bold shadow-sm ${
+                            item.mode === "Online"
+                              ? "bg-brand text-heading"
+                              : "bg-heading text-background"
+                          }`}
+                        >
+                          {item.mode === "Online" ? (
+                            <Video className="h-3.5 w-3.5" />
+                          ) : (
+                            <MapPin className="h-3.5 w-3.5 text-brand" />
+                          )}
+                          {item.mode}
+                        </span>
+                      </div>
+
+                      {/* Class Level Badge */}
+                      <div className="absolute top-3 right-3">
+                        <span className="rounded-lg bg-background/90 backdrop-blur-md px-2.5 py-1 text-xs font-semibold text-heading shadow-xs">
+                          {item.classLevel}
+                        </span>
+                      </div>
                     </div>
-                    <div className="overflow-hidden">
-                      <p className="text-xs font-medium text-body">Tutor</p>
-                      <p className="text-sm font-semibold text-heading truncate max-w-30">
-                        {item.tutorName}
+
+                    {/* Card Body Info */}
+                    <div className="p-6 space-y-3">
+                      <div className="flex items-center justify-between text-xs font-medium text-body">
+                        <span className="text-brand font-semibold uppercase tracking-wider">
+                          {item.subject}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3.5 w-3.5 text-body" />
+                          {item.daysPerWeek} days/week
+                        </span>
+                      </div>
+
+                      {/* Title */}
+                      <h3 className="text-lg font-bold text-heading line-clamp-2 group-hover:text-brand transition-colors">
+                        {item.title}
+                      </h3>
+
+                      {/* Location or Mode Details */}
+                      {item.mode === "Offline" && item.location && (
+                        <p className="flex items-center gap-1.5 text-xs text-body">
+                          <MapPin className="h-3.5 w-3.5 text-brand shrink-0" />
+                          <span className="truncate">{item.location}</span>
+                        </p>
+                      )}
+
+                      {/* Description */}
+                      <p className="text-sm text-body line-clamp-2">
+                        {item.description}
                       </p>
                     </div>
                   </div>
 
-                  <div className="text-right">
-                    <span className="text-xs text-body block">Monthly Fee</span>
-                    <span className="text-base font-extrabold text-heading">
-                      ৳{item.monthlyFee.toLocaleString()}
-                    </span>
+                  {/* Card Footer: Tutor Info, Price & View Details Button */}
+                  <div className="p-6 pt-0 mt-auto space-y-4">
+                    <div className="border-t border-border-subtle pt-4 flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        {tutorImage ? (
+                          <div className="relative h-9 w-9 overflow-hidden rounded-xl border border-brand/20 shrink-0">
+                            <Image
+                              src={tutorImage}
+                              alt={tutorName}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-tint text-heading font-bold text-xs border border-brand/20 shrink-0">
+                            {initials}
+                          </div>
+                        )}
+                        <div className="overflow-hidden">
+                          <p className="text-xs font-medium text-body">Tutor</p>
+                          <p className="text-sm font-semibold text-heading truncate max-w-30">
+                            {tutorName}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="text-xs text-body block">
+                          Monthly Fee
+                        </span>
+                        <span className="text-base font-extrabold text-heading">
+                          ৳{Number(item.monthlyFee || 0).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* View Details Button */}
+                    <Link href={`/tuitions/${item._id}`} className="block">
+                      <Button className="w-full bg-brand hover:bg-brand-hover text-heading font-semibold py-5 rounded-xl shadow-xs transition-all cursor-pointer">
+                        View Details
+                      </Button>
+                    </Link>
                   </div>
                 </div>
-
-                {/* View Details Button */}
-                <Link href={`/tuitions/${item._id}`} className="block">
-                  <Button className="w-full bg-brand hover:bg-brand-hover text-heading font-semibold py-5 rounded-xl shadow-xs transition-all cursor-pointer">
-                    View Details
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

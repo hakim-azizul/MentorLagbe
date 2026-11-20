@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, CheckCircle2, RefreshCw } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  RefreshCw,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -166,8 +171,7 @@ export default function ApplySection({
       <div className="flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4">
         <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
         <p className="text-sm text-heading">
-          Only students can apply for tuitions. You are currently signed in as
-          a{" "}
+          Only students can apply for tuitions. You are currently signed in as a{" "}
           <span className="font-semibold">
             {role === "tutor" ? "Tutor" : "Admin"}
           </span>
@@ -200,7 +204,8 @@ export default function ApplySection({
       </div>
     );
   }
-
+  // ---- student: already applied ----------------------------------------
+  const initialPhone = user?.phone && user.phone.trim().length >= 8 ? user.phone.trim() : "";
   // ---- student: apply now ----------------------------------------------
   return (
     <>
@@ -219,8 +224,8 @@ export default function ApplySection({
               Apply for {tuitionTitle}
             </DialogTitle>
             <DialogDescription className="text-body">
-              Share your contact details and preferred schedule — the tutor
-              will get back to you.
+              Share your contact details and preferred schedule — the tutor will
+              get back to you.
             </DialogDescription>
           </DialogHeader>
 
@@ -241,7 +246,7 @@ export default function ApplySection({
               <Input
                 id="apply-phone"
                 type="tel"
-                value={phone}
+                value={phone || initialPhone}
                 onChange={(event) => setPhone(event.target.value)}
                 placeholder="01XXXXXXXXX"
                 className="border-border-subtle bg-background"
