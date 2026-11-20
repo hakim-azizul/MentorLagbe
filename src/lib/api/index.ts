@@ -13,3 +13,4 @@ export * from "./jwt";
 export * from "./tuitionApi";
 export * from "./applicationApi";
 export * from "./userApi";
+export * from "./paymentApi";

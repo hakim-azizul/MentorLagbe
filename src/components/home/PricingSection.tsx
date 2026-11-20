@@ -100,20 +100,6 @@ const plansData: Record<AudienceTab, PlanItem[]> = {
 
 export default function PricingSection() {
   const [activeTab, setActiveTab] = useState<AudienceTab>("tutor");
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-
-  // ভবিষ্যতে এখানে Stripe Checkout Session API কল হবে
-  const handleStripeCheckout = async (plan: PlanItem) => {
-    setLoadingPlan(plan.id);
-    try {
-      // TODO: POST /api/stripe/create-checkout-session { planId: plan.id, role: activeTab }
-      // তারপর stripe session.url এ redirect করবেন
-      console.log("Initiating Stripe Checkout for:", plan);
-      alert(`Stripe Checkout ready for ${plan.name} ($${plan.price}/mo)`);
-    } finally {
-      setLoadingPlan(null);
-    }
-  };
 
   const currentPlans = plansData[activeTab];
 
@@ -238,14 +224,12 @@ export default function PricingSection() {
               {/* Action CTA Button */}
               <div className="mt-8 pt-4">
                 {plan.isPro ? (
-                  <Button
-                    onClick={() => handleStripeCheckout(plan)}
-                    disabled={loadingPlan === plan.id}
-                    className="w-full bg-brand hover:bg-brand-hover text-heading font-bold py-6 rounded-xl shadow-sm transition-all gap-2 cursor-pointer text-sm"
-                  >
-                    <CreditCard className="h-4 w-4" />
-                    {loadingPlan === plan.id ? "Redirecting..." : plan.ctaText}
-                  </Button>
+                  <Link href="/payment" className="block">
+                    <Button className="w-full bg-brand hover:bg-brand-hover text-heading font-bold py-6 rounded-xl shadow-sm transition-all gap-2 cursor-pointer text-sm">
+                      <CreditCard className="h-4 w-4" />
+                      {plan.ctaText}
+                    </Button>
+                  </Link>
                 ) : (
                   <Link href="/signup" className="block">
                     <Button

@@ -57,6 +57,11 @@ src/
       tuitions/[id]/_components/
         TuitionDetails.tsx      # 2-column layout, sticky fee + tutor card
         ApplySection.tsx        # role-restricted apply flow + Dialog form
+      payment/page.tsx          # /payment — server: role-aware Pro pricing ($15 tutor / $10 student) + checkout form
+      checkout/page.tsx         # /checkout — legacy redirect to /checkout/success (or /payment)
+      checkout/success/page.tsx # /checkout/success — server shell for the client verifier below
+      checkout/success/_components/
+        CheckoutSuccess.tsx     # client: checkoutVerify(session_id) → loading/success/error + dashboard redirect
     (dashboard)/
       layout.tsx                # guard + <DashboardShell> (sidebar/topbar) for all /dashboard/*
       dashboard/page.tsx        # /dashboard → redirects to the role home
@@ -69,7 +74,7 @@ src/
   components/
     ui/                         # shadcn components: button, input, avatar, dropdown-menu, table, badge, dialog, select, ...
     shared/                     # Navbar.tsx (server), NavbarClient.tsx (client), Footer.tsx
-    home/                       # HeroBanner, FeaturedTuitions, PricingSection, HowItWorks, PlatformStatsAndSubjects
+    home/                       # HeroBanner, FeaturedTuitions (client fetch, limit=6), PricingSection, HowItWorks, PlatformStatsAndSubjects
     dashboard/                  # DashboardShell, StatCard, PageHeader, EmptyState, StatusBadge, ConfirmDialog, ...
   config/
     dashboardRoutes.ts          # sidebar links + roleHome per role (student/tutor/admin)
@@ -83,6 +88,7 @@ src/
       tuitionApi.ts             # fetchApprovedTuitions(queryString?, signal?), fetchTuitionById(id)
       applicationApi.ts         # applyForTuition(payload), checkStudentApplication(tuitionId, email)
       userApi.ts                # fetchCurrentUserProfile(), updateUserProfile(payload: tUserEdit)
+      paymentApi.ts             # checkoutVerify(sessionId, signal?) → POST /payments/checkout-verify
     format.ts                   # currency/date helpers
     auth.ts                     # server better-auth config
     auth-client.ts              # createAuthClient → { authClient, signIn, signUp, useSession } (type-only auth import)
@@ -97,7 +103,8 @@ public/                         # static assets (logo.png)
 ## Routing — canonical auth URLs
 
 - Sign in is **`/signin`**, sign up is **`/signup`**. Never link to `/login`, `/sign-up`, or `/register` (legacy dead links, all removed).
-- **Exists today:** `/`, `/signin`, `/signup`, `/api/auth/*`, `/tuitions`, `/tuitions/[id]`, `/dashboard` (+ all role pages below).
+- **Exists today:** `/`, `/signin`, `/signup`, `/api/auth/*`, `/tuitions`, `/tuitions/[id]`, `/payment`, `/checkout/success`, `/dashboard` (+ all role pages below). `/checkout` is a legacy redirect to `/checkout/success`.
+- **Payments:** `/payment` is a server component (reads `getSession()`); it shows a sign-in prompt when signed out, an "already Pro" card when `plan === "pro"`, a not-available card for admins, and otherwise the role-based Pro card (tutor $15 / student $10) whose `<form action="/api/checkout_sessions" method="POST">` starts Stripe Checkout. `POST /api/checkout_sessions` selects `STRIPE_PRICE_TUTOR_PRO` / `STRIPE_PRICE_STUDENT_PRO`, attaches `metadata { userId, role, plan: "pro" }`, redirects to Stripe, and on failure redirects to `/payment?error=signin_required|already_pro|invalid_role|price_missing|checkout_failed` (cancel → `/payment?canceled=1`). Stripe returns to `/checkout/success?session_id=…`, where the client `CheckoutSuccess` calls `checkoutVerify()` (loading → success/error), `router.refresh()`, then redirects to `roleHome[role]` after 2.5 s. The server-side webhook is the second path, so closing the browser still activates Pro.
 - **`/dashboard` routes (all guarded by `requireDashboardUser`):** `/dashboard` redirects to the role home; any role: `/dashboard/profile` (view/edit own profile — no role gate); `student`: `/dashboard/student`, `/dashboard/student/my-applications`; `tutor`: `/dashboard/tutor`, `/dashboard/tutor/post-tuition`, `/dashboard/tutor/my-tuitions`, `/dashboard/tutor/applicants`; `admin`: `/dashboard/admin`, `/dashboard/admin/users`, `/dashboard/admin/tuitions`, `/dashboard/admin/transactions`. Wrong role → 307 to that user's role home; no session → 307 to `/signin`.
 - **`/tuitions` (public, route group `(root)` — no guard):** search/filter/sort state lives in the **URL query params** (`search`, `subject`, `classLevel`, `mode`, `sort`) so refresh/share/back-forward all reproduce the same view. `page.tsx` is a thin server component (metadata + `Suspense` boundary — required for `useSearchParams`) around the client `BrowseTuitions.tsx`, which reads params with `useSearchParams`, writes them via `router.replace(..., { scroll: false })` (search input debounced 300 ms into the URL; `ALL_OPTION`/"Clear" just remove params; default `sort=newest` is never written), and re-fetches whenever params change (stale requests cancelled with `AbortController`). Params go to `fetchApprovedTuitions()` → `GET /api/tuitions`, where MongoDB filters + sorts. `/tuitions/[id]` renders details server-side (`notFound()` on 404) and resolves the apply flow client-side via `useSession()` (signed out → link to `/signin`; tutor/admin → notice; student → already-applied check + Dialog form).
 - **Linked but not built yet (will 404):** `/tutors`, `/batches`, `/become-tutor`, `/pricing`, `/dashboard/enrollments`, `/forgot-password`. Create the page before linking to a new route.
@@ -108,6 +115,7 @@ public/                         # static assets (logo.png)
 - `tuitionApi.ts` — `fetchApprovedTuitions(queryString?, signal?)` (`GET /api/tuitions`, e.g. `"search=phys&mode=Online&sort=fee_asc"`; the optional `AbortSignal` lets the browse page cancel stale requests when params change; every item includes the populated `tutor` summary with `image` for the card avatar), `fetchTuitionById(id)` (`GET /api/tuitions/:id`, throws `ApiError(404)` → page calls `notFound()`).
 - `applicationApi.ts` — `applyForTuition(payload)` (`POST /api/applications`; payload keys: `tuitionId, studentEmail, studentName, phone, preferredSchedule, note`), `checkStudentApplication(tuitionId, email)` (`GET /api/applications/check` → `{ hasApplied }`).
 - `userApi.ts` — `fetchCurrentUserProfile()` (`GET /api/profile` → `tUserProfile`, the `tUserEdit` fields plus `_id/role/plan/createdAt`; phone/bio aren't in the session so the profile form loads them here), `updateUserProfile(payload: tUserEdit)` (`PATCH /api/profile` → updated profile; backend whitelists the 5 editable fields — `role`/`plan` in the body are ignored). Type `tUserProfile = tUserEdit & { _id, role, plan, createdAt }`.
+- `paymentApi.ts` — `checkoutVerify(sessionId, signal?)` (`POST /payments/checkout-verify`) → `{ success, duplicate, plan: "pro", role, message }`; throws `ApiError` (400 incomplete/unpaid session, 404 unknown session, 500 Stripe not configured).
 - `client.ts` — `apiFetch<T>()` (shared fetch wrapper: `API_URL`, `credentials: "include"`, **`Authorization: Bearer <JWT>`** via `getJwt()`, one refresh-and-retry on `401`, JSON handling, throws `ApiError` with `.status`), `ApiError`, `API_URL`.
 - `jwt.ts` — the Better Auth → Express bridge: `getJwt()` calls `GET /api/auth/token` (signed session cookie required) and caches the JWT in memory (refreshed 30 s before `exp`, 15 s negative cache while signed out, shared inflight promise; always `null` during SSR so public server-side fetches just skip the header). `clearJwtCache()` runs on sign-in/sign-up/sign-out (`signin/signup` pages, `NavbarClient`, `DashboardShell`) and before every 401 retry.
 - `index.ts` is a barrel, so the legacy import path `@/lib/api` keeps working for `apiFetch`/`ApiError` (used by `useApi` and dashboard components).
@@ -119,12 +127,19 @@ All backend logic lives in **`../mentor-server/index.js`** (Express + native Mon
 
 **Public (no session required):**
 
-- `GET /api/tuitions` — approved + active listings. Optional query params: `search` (case-insensitive regex over `title`/`subject`, escaped), `subject`, `classLevel`, `mode`, `sort` (`newest` | `oldest` | `fee_asc` | `fee_desc`; unknown value → newest; applied inside the DB query). Every item carries a populated `tutor` summary (`name`, `email`, `image`, `bio`, `plan` — one bulk `user` lookup via the shared `tutorSummary()` helper, same shape as `GET /api/tuitions/:id`) so the browse cards render the tutor avatar.
+- `GET /api/tuitions` — approved + active listings. Optional query params: `search` (case-insensitive regex over `title`/`subject`, escaped), `subject`, `classLevel`, `mode`, `limit` (1–100, e.g. the home page's `limit=6`; capped server-side), `sort` (`newest` | `oldest` | `fee_asc` | `fee_desc`; unknown value → newest; applied inside the DB query). Every item carries a populated `tutor` summary (`name`, `email`, `image`, `bio`, `plan` — one bulk `user` lookup via the shared `tutorSummary()` helper, same shape as `GET /api/tuitions/:id`) so the browse cards render the tutor avatar. `components/home/FeaturedTuitions.tsx` calls this client-side with `limit=6` and renders loading/empty states; the database currently holds 20 approved listings for the demo tutor `gozatea@indo.com`.
 - `GET /api/tuitions/:id` — single tuition + populated `tutor` summary (`name`, `email`, `image`, `bio`, `plan` from the `user` collection). Invalid/unknown id → `404`.
 - `POST /api/applications` — body `tuitionId, studentEmail, studentName, phone, preferredSchedule, note` → `201`; missing field → `400 "Please fill in: ..."`; applicant not `role: student` in `user` → `403 "Only students can apply for tuitions."`; duplicate (`tuitionId` + `studentEmail`) → `409 "You have already applied for this tuition."`. Stores `studentPhone`/`studentNote`, `status: "pending"`, `appliedAt`/`createdAt`.
 - `GET /api/applications/check?tuitionId=&email=` — → `{ hasApplied: boolean }` (`400` when a param is missing).
 
 **Bearer-JWT-guarded (`Authorization: Bearer <JWT>` from Better Auth, role enforced):** `POST|GET|PATCH|DELETE /api/tuitions` (owner-or-admin edits; `GET /api/tuitions/tutor`), `GET|PATCH|DELETE /api/applications` (`/student`, `/tutor`, `/:id/status`), `/api/dashboard/{student,tutor,admin}/stats`, `/api/admin/*` (users, tuitions, transactions). **`GET|PATCH /api/profile`** — any authenticated role (no role gate): reads/updates only the caller's own `user` doc (identity from `req.user.id`), PATCH whitelists `name, email, image, phone, bio`, changed email is checked case-insensitively against other accounts (`409` on clash), missing name/email → `400`, returns `{ _id, name, email, image, phone, bio, role, plan, createdAt }`.
+
+**Payments / Stripe (public, no Bearer JWT):**
+
+- `POST /payments/checkout-verify` — body `{ sessionId }`. Retrieves the Checkout Session from Stripe (server-side truth), requires `status === "complete"` + `payment_status === "paid"`, validates `metadata.userId` as a MongoDB `ObjectId`, then runs the shared `syncProPlan()`. Errors are JSON: `400` missing `sessionId` / incomplete session / invalid userId / non-student-tutor role, `404` unknown session (`resource_missing`) or deleted user, `500` missing `STRIPE_SECRET_KEY`. Success: `{ success: true, duplicate, plan: "pro", role, message }`.
+- `POST /payments/webhook` — Stripe webhook registered **before** `express.json()` (raw-body signature verification with `express.raw({ type: "application/json" })` + `stripe.webhooks.constructEvent`). Handles `checkout.session.completed` and `checkout.session.async_payment_succeeded`; unsigned/invalid → `400`, non-2xx makes Stripe retry. Also calls `syncProPlan()`, so Pro activates even if the browser never returns to `success_url`.
+- `syncProPlan(session)` — the single write path shared by both routes. Upserts into `payments` keyed by `stripeSessionId` (`$setOnInsert`, unique partial index `uniq_stripeSessionId` created at boot) → replay = `duplicate: true`, never a second record; then always `$set: { plan: "pro", updatedAt }` on the user. `payments` doc: `userId, userName, userEmail, userRole, planName: "pro", amount` (**major units**, `amount_total / 100`), `currency`, `transactionId` (PaymentIntent id), `stripeSessionId`, `paymentStatus: "paid"`, `paidAt`, `createdAt`.
+- `getStripe()` is lazy: the API boots without Stripe env (smoke/e2e) and only Stripe routes return a clear `500 "STRIPE_SECRET_KEY is not configured."`.
 
 **Middleware chain:** `verifyToken` (jose `jwtVerify` against the remote JWKS → sync/create the `user` doc → attach `req.user`; `401` missing/invalid/expired/wrong-issuer token, `503` JWKS unreachable) then a role gate — `verifyStudent` (`student`|`admin`), `verifyTutor` (`tutor`|`admin`), `verifyAdmin` (`admin`); admin passes every gate. The **database is authoritative for `role`/`plan`**: an existing user's values are never overwritten from token claims, so an admin role change applies even while the old JWT (15 min TTL) is still in flight. Config lives in `mentor-server/.env`: `JWT_ISSUER` (Better Auth origin, default `http://localhost:3000`), `JWT_AUDIENCE` (this API, default `http://localhost:5000`), `JWKS_URL` (`<issuer>/api/auth/jwks`) — must match the `jwt({ ... })` options in `src/lib/auth.ts`.
 
@@ -157,8 +172,8 @@ Examples: `bg-background`, `text-heading`, `text-body`, `border-border-subtle`, 
 
 ## Environment variables (`.env` — names only, never commit values)
 
-- Defined: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `DB_URI`, `NEXT_PUBLIC_API_URL` (mentor-server base URL — also the JWT `audience`), `NEXT_PUBLIC_APP_URL` (public app URL — auth client `baseURL` + trusted origin), `NEXT_PUBLIC_IMGBB_API_KEY` (ImgBB banner uploads)
-- `../mentor-server/.env` defines: `PORT`, `DB_URI`, `BETTER_AUTH_SECRET` (**must equal the client's** — the smoke suite signs better-auth session cookies with it to mint JWTs), `JWT_ISSUER` (= `BETTER_AUTH_URL`), `JWT_AUDIENCE` (= `NEXT_PUBLIC_API_URL`), `JWKS_URL` (= `<issuer>/api/auth/jwks`), optional `CLIENT_ORIGINS`
+- Defined: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `DB_URI`, `NEXT_PUBLIC_API_URL` (mentor-server base URL — also the JWT `audience`), `NEXT_PUBLIC_APP_URL` (public app URL — auth client `baseURL` + trusted origin), `NEXT_PUBLIC_IMGBB_API_KEY` (ImgBB banner uploads), `STRIPE_SECRET_KEY` + `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (Stripe), `STRIPE_PRICE_TUTOR_PRO` + `STRIPE_PRICE_STUDENT_PRO` (Pro Price IDs; blank until copied from the Stripe Dashboard)
+- `../mentor-server/.env` defines: `PORT`, `DB_URI`, `BETTER_AUTH_SECRET` (**must equal the client's** — the smoke suite signs better-auth session cookies with it to mint JWTs), `JWT_ISSUER` (= `BETTER_AUTH_URL`), `JWT_AUDIENCE` (= `NEXT_PUBLIC_API_URL`), `JWKS_URL` (= `<issuer>/api/auth/jwks`), `STRIPE_SECRET_KEY` (server-side secret), `STRIPE_WEBHOOK_SECRET` (`stripe listen` signing secret / Dashboard endpoint), optional `CLIENT_ORIGINS`
 - Referenced but **missing** from `.env`: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (used in `src/lib/auth.ts`; Google sign-in is disabled until they're added — better-auth logs a warning, harmless)
 
 ## Conventions & gotchas

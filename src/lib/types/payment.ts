@@ -1,5 +1,6 @@
 export type Payment = {
   _id: string;
+  userId: string;
   userEmail: string;
   userName: string;
   userRole: "student" | "tutor";
