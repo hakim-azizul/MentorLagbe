@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -8,6 +8,8 @@ import {
   AlertTriangle,
   BookOpen,
   Calendar,
+  ChevronLeft,
+  ChevronRight,
   MapPin,
   RefreshCw,
   Search,
@@ -26,9 +28,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ApiError } from "@/lib/api";
-import { fetchApprovedTuitions } from "@/lib/api/tuitionApi";
+import {
+  fetchApprovedTuitions,
+  fetchTuitions,
+} from "@/lib/api/tuitionApi";
 import { formatCurrency } from "@/lib/format";
-import type { tmode, tTuitionView } from "@/lib/types/tuition";
+import { cn } from "@/lib/utils";
+import type {
+  tmode,
+  tTuitionPagination,
+  tTuitionView,
+} from "@/lib/types/tuition";
 
 /** পোস্ট-টিউশন ফর্মের CLASS_LEVELS-এর সাথে মিল রেখে তৈরি */
 const CLASS_LEVELS = [
@@ -66,8 +76,38 @@ const ALL_OPTION = "__all__";
 
 const DEBOUNCE_MS = 300;
 
-/** `/tuitions` পেজের পুরো স্টেট URL-এ এই পাঁচটি query param হিসেবে থাকে। */
-type tParamKey = "search" | "subject" | "classLevel" | "mode" | "sort";
+/** ব্রাউজ পেজের আকার — সার্ভার ডিফল্ট (12)-এর সাথে মিল। */
+const PAGE_SIZE = 12;
+
+/** `/tuitions` পেজের পুরো স্টেট URL-এ এই query param গুলোতে থাকে। */
+type tParamKey = "search" | "subject" | "classLevel" | "mode" | "sort" | "page";
+
+/** ১..totalPages — মাঝখানে ellipsis সহ সংক্ষিপ্ত পেজ নম্বর তালিকা। */
+function pageNumbers(current: number, total: number): (number | "…")[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, index) => index + 1);
+  }
+
+  const candidates = new Set<number>([
+    1,
+    total,
+    current,
+    current - 1,
+    current + 1,
+  ]);
+  const sorted = [...candidates]
+    .filter((value) => value >= 1 && value <= total)
+    .sort((a, b) => a - b);
+
+  const result: (number | "…")[] = [];
+  let previous = 0;
+  for (const value of sorted) {
+    if (previous && value - previous > 1) result.push("…");
+    result.push(value);
+    previous = value;
+  }
+  return result;
+}
 
 function ModeIcon({ mode }: { mode: tmode }) {
   if (mode === "Online") return <Video className="h-3.5 w-3.5" />;
@@ -102,6 +142,8 @@ export default function BrowseTuitions() {
   const mode = searchParams.get("mode") ?? "";
   const sortParam = searchParams.get("sort") ?? "";
   const sort = SORTS[sortParam] ? sortParam : DEFAULT_SORT;
+  const pageParam = Number.parseInt(searchParams.get("page") ?? "1", 10);
+  const page = Number.isFinite(pageParam) && pageParam >= 1 ? pageParam : 1;
 
   /** প্যারামিটার সেট/ডিলিট করে (`null`/খালি/ডিফল্ট সর্ট = ডিলিট)। */
   const applyParams = useCallback(
@@ -125,6 +167,15 @@ export default function BrowseTuitions() {
           next.set(key, value as string);
           changed = true;
         }
+      }
+
+      // যেকোনো ফিল্টার/সর্ট বদলালে পেজ ১-এ ফিরে যাই (পেজ বদলালে নয়)।
+      const isFilterChange = (Object.keys(patch) as tParamKey[]).some(
+        (key) => key !== "page"
+      );
+      if (isFilterChange && next.has("page")) {
+        next.delete("page");
+        changed = true;
       }
 
       if (!changed) return;
@@ -151,17 +202,31 @@ export default function BrowseTuitions() {
   }
 
   useEffect(() => {
+    const term = searchInput.trim();
+    // মাউন্টে বা ব্যাক/ফরোয়ার্ডে ইনপুট আর URL একই হলে কিছু করবেন না —
+    // নাহলে ডিবাউন্স এফেক্ট ?page=2 মুছে দিতে পারে।
+    if (term === search) return;
+
     const timer = setTimeout(() => {
-      applyParams({ search: searchInput.trim() || null });
+      applyParams({ search: term || null });
     }, DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [searchInput, applyParams]);
+  }, [searchInput, search, applyParams]);
 
   // ---- ডেটা ----------------------------------------------------------
   const [tuitions, setTuitions] = useState<tTuitionView[]>([]);
   const [subjects, setSubjects] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const [pagination, setPagination] = useState<tTuitionPagination>({
+    page: 1,
+    limit: PAGE_SIZE,
+    totalItems: 0,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
   // সর্বশেষ রেসপন্স কোন কোয়েরির জন্য এসেছে — `loading` এখান থেকেই
   // ডিরাইভড, তাই এফেক্টে সিঙ্ক setState করতে হয় না (react-hooks নিয়ম)
   const [loaded, setLoaded] = useState<{
@@ -169,21 +234,24 @@ export default function BrowseTuitions() {
     refresh: number;
   } | null>(null);
 
-  /** URL থেকে ব্যাকএন্ড কোয়েরি স্ট্রিং — ডিফল্ট সর্ট কোয়েরিতে যায় না। */
-  const query = useMemo(() => {
-    const params = new URLSearchParams();
-    const term = search.trim();
-    if (term) params.set("search", term);
-    if (subject) params.set("subject", subject);
-    if (classLevel) params.set("classLevel", classLevel);
-    if (mode) params.set("mode", mode);
-    if (sort !== DEFAULT_SORT) params.set("sort", sort);
-    return params.toString();
-  }, [search, subject, classLevel, mode, sort]);
+  /** URL-এর স্টেট থেকেই ব্যাকএন্ড কোয়েরি — ডিফল্ট সর্ট যায় না। */
+  const fetchOptions = useMemo(
+    () => ({
+      page,
+      limit: PAGE_SIZE,
+      search: search.trim() || undefined,
+      subject: subject || undefined,
+      classLevel: classLevel || undefined,
+      mode: mode || undefined,
+      sort: sort !== DEFAULT_SORT ? sort : undefined,
+    }),
+    [page, search, subject, classLevel, mode, sort],
+  );
+  const fetchKey = JSON.stringify(fetchOptions);
 
   /** চলতি কোয়েরির রেসপন্স এখনো আসেনি বা রিফ্রেশ চলছে → স্কেলেটন। */
   const loading =
-    !loaded || loaded.query !== query || loaded.refresh !== refreshKey;
+    !loaded || loaded.query !== fetchKey || loaded.refresh !== refreshKey;
 
   // URL বদললেই রিফেচ (সার্চ আগে ডিবাউন্স হয়ে URL-এ পৌঁছেছে)। আগের
   // রিকোয়েস্ট abort হয়ে যায় — নাহলে পুরনো রেসপন্স নতুন ফিল্টারে ঢুকে পড়ত।
@@ -191,12 +259,20 @@ export default function BrowseTuitions() {
     const controller = new AbortController();
     let active = true;
 
-    fetchApprovedTuitions(query || undefined, controller.signal)
-      .then((data) => {
+    fetchTuitions({ ...fetchOptions, signal: controller.signal })
+      .then((result) => {
         if (!active) return;
-        setTuitions(data);
+        setTuitions(result.items);
+        setPagination({
+          page: result.page,
+          limit: result.limit,
+          totalItems: result.totalItems,
+          totalPages: result.totalPages,
+          hasNextPage: result.hasNextPage,
+          hasPrevPage: result.hasPrevPage,
+        });
         setError(null);
-        setLoaded({ query, refresh: refreshKey });
+        setLoaded({ query: fetchKey, refresh: refreshKey });
       })
       .catch((err: unknown) => {
         if (!active) return;
@@ -207,20 +283,20 @@ export default function BrowseTuitions() {
             ? err.message
             : "Something went wrong. Please try again."
         );
-        setLoaded({ query, refresh: refreshKey });
+        setLoaded({ query: fetchKey, refresh: refreshKey });
       });
 
     return () => {
       active = false;
       controller.abort();
     };
-  }, [query, refreshKey]);
+  }, [fetchOptions, fetchKey, refreshKey]);
 
   // সাবজেক্ট ড্রপডাউনের তালিকা আসে আনফিল্টারড রেসপন্স থেকে,
   // নাহলে ফিল্টার দিলেই বাকি অপশনগুলো মুছে যায়
   useEffect(() => {
     const controller = new AbortController();
-    fetchApprovedTuitions(undefined, controller.signal)
+    fetchApprovedTuitions("limit=50", controller.signal)
       .then((rows) =>
         setSubjects([...new Set(rows.map((item) => item.subject))].sort())
       )
@@ -256,6 +332,21 @@ export default function BrowseTuitions() {
       title: "Refreshing tuitions",
       description: "Loading the latest listings.",
       type: "info",
+    });
+  };
+
+  /** পেজ বদলালে URL আপডেট + তালিকার উপরে স्मুদ_scroll। */
+  const handlePageChange = (nextPage: number) => {
+    if (
+      nextPage === page ||
+      nextPage < 1 ||
+      nextPage > pagination.totalPages
+    ) {
+      return;
+    }
+    applyParams({ page: String(nextPage) });
+    window.requestAnimationFrame(() => {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   };
 
@@ -381,14 +472,14 @@ export default function BrowseTuitions() {
       {/* Result count */}
       {!loading && !error && (
         <p className="mt-4 text-sm text-body" aria-live="polite">
-          {tuitions.length === 0
+          {pagination.totalItems === 0
             ? "No tuitions found"
-            : `${tuitions.length} tuition${tuitions.length === 1 ? "" : "s"} available`}
+            : `${pagination.totalItems} tuition${pagination.totalItems === 1 ? "" : "s"} available`}
         </p>
       )}
 
       {/* States */}
-      <div className="mt-6">
+      <div ref={resultsRef} className="mt-6 scroll-mt-24">
         {loading ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
@@ -544,6 +635,82 @@ export default function BrowseTuitions() {
           </div>
         )}
       </div>
+
+      {/* Pagination — URL- driven, fully keyboard accessible */}
+      {!loading && !error && pagination.totalPages > 1 && (
+        <nav
+          aria-label="Tuition pages"
+          className="mt-8 flex flex-col items-center gap-4"
+        >
+          <p className="text-sm text-body">
+            Page{" "}
+            <span className="font-semibold text-heading">
+              {pagination.page}
+            </span>{" "}
+            of{" "}
+            <span className="font-semibold text-heading">
+              {pagination.totalPages}
+            </span>
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(page - 1)}
+              disabled={!pagination.hasPrevPage}
+              aria-label="Previous page"
+              className="gap-1 border-border-subtle bg-background text-heading hover:bg-brand-tint"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+
+            {pageNumbers(page, pagination.totalPages).map((item, index) =>
+              item === "…" ? (
+                <span
+                  key={`gap-${index}`}
+                  aria-hidden="true"
+                  className="px-1 text-sm text-body"
+                >
+                  …
+                </span>
+              ) : (
+                <Button
+                  key={item}
+                  type="button"
+                  size="sm"
+                  onClick={() => handlePageChange(item)}
+                  aria-current={item === page ? "page" : undefined}
+                  aria-label={`Go to page ${item}`}
+                  className={cn(
+                    "h-8 min-w-8 border px-2.5",
+                    item === page
+                      ? "border-brand bg-brand font-bold text-primary-foreground"
+                      : "border-border-subtle bg-background text-heading hover:bg-brand-tint"
+                  )}
+                >
+                  {item}
+                </Button>
+              )
+            )}
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(page + 1)}
+              disabled={!pagination.hasNextPage}
+              aria-label="Next page"
+              className="gap-1 border-border-subtle bg-background text-heading hover:bg-brand-tint"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </nav>
+      )}
     </>
   );
 }

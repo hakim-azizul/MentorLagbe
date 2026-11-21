@@ -53,3 +53,29 @@ export type tTuitionView = {
 export type tTuitionDetails = tTuition & {
   tutor: tTutorProfile;
 };
+
+/** GET /api/tuitions?page=&limit= — ফিল্টার করা কোয়েরির pagination মেটাডেটা। */
+export type tTuitionPagination = {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+};
+
+/** `?meta=1` রেসপন্স — আইটেম + pagination একসাথে। */
+export type tTuitionPage = tTuitionPagination & {
+  items: tTuitionView[];
+};
+
+/** fetchTuitions()-এর ফিল্টার/পেজিনেশন অপশন। */
+export type tTuitionQuery = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  subject?: string;
+  classLevel?: string;
+  mode?: string;
+  sort?: string;
+};

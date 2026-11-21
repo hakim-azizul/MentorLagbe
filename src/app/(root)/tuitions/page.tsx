@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 };
 
 /**
- * `/tuitions` — সার্চ/ফিল্টার/সর্ট সবই URL query param-এ চলে
- * (`search`, `subject`, `classLevel`, `mode`, `sort`), তাই রিফ্রেশ বা
+ * `/tuitions` — সার্চ/ফিল্টার/সর্ট/পেজ সবই URL query param-এ চলে
+ * (`search`, `subject`, `classLevel`, `mode`, `sort`, `page`), তাই রিফ্রেশ বা
  * লিংক শেয়ার করলেও একই ফল পাওয়া যায়। `useSearchParams` ব্যবহারে
  * Next.js ডকস অনুযায়ী Suspense বাউন্ডারি বাধ্যতামূলক — শুরুতে
  * স্কেলেটন দেখায়, তারপর ক্লায়েন্টে ডেটা লোড হয়।
