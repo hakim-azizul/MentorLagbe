@@ -41,6 +41,7 @@ interface NavbarClientProps {
 const navLinks = [
   { name: "Home", href: "/" },
   { name: "Tuition Batches", href: "/tuitions" },
+  { name: "Pricing", href: "/pricing" },
 ];
 
 export default function NavbarClient({ user }: NavbarClientProps) {
