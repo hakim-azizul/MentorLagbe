@@ -54,12 +54,6 @@ export const auth = betterAuth({
             },
         },
     },
-    socialProviders: {
-        google: {
-            clientId: process.env.GOOGLE_CLIENT_ID as string,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-        },
-    },
     plugins: [
         // mentor-server (Express) এই JWT টোকেন `Authorization: Bearer` হেডারে
         // পায় ও JWKS (/api/auth/jwks) দিয়ে verify করে — issuer/audience মান

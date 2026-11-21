@@ -9,6 +9,83 @@ import { XIcon, CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Load
 
 const toast = ToastPrimitive.createToastManager()
 
+type ToastVariant =
+  | "default"
+  | "success"
+  | "error"
+  | "warning"
+  | "info"
+  | "loading"
+
+const TOAST_VARIANTS: ToastVariant[] = [
+  "default",
+  "success",
+  "error",
+  "warning",
+  "info",
+  "loading",
+]
+
+/**
+ * টাইপ-ভিত্তিক স্টাইল — সব ক্লাস লিটারেল, কোনো ডাইনামিক টেমপ্লেট স্ট্রিং নেই,
+ * তাই Tailwind স্ক্যান করে ক্লাসগুলো সহজেই ধরে নেয় (purge-এর সমস্যা নেই)।
+ * হালকা সারফেসে ডিজাইন টোকেন (brand / destructive) ও ডার্ক সারফেসে
+ * সাধারণ কালার স্কেল ব্যবহার করা হয়েছে — দুটোতেই কনট্রাস্ট ঠিক থাকে।
+ */
+const TOAST_STYLES: Record<
+  ToastVariant,
+  {
+    root: string
+    icon: string
+    title: string
+    description: string
+    close: string
+  }
+> = {
+  default: {
+    root: "border-border-subtle bg-background text-heading border-l-4 border-l-muted-foreground/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-50 dark:border-l-slate-400",
+    icon: "text-body dark:text-slate-300",
+    title: "text-heading dark:text-slate-50",
+    description: "text-body dark:text-slate-300",
+    close: "text-muted-foreground dark:text-slate-400 hover:text-heading dark:hover:text-white",
+  },
+  success: {
+    root: "border-brand/35 bg-brand-tint text-heading border-l-4 border-l-brand dark:border-emerald-500/40 dark:bg-emerald-950/70 dark:text-emerald-50 dark:border-l-emerald-400",
+    icon: "text-emerald-700 dark:text-emerald-300",
+    title: "text-emerald-900 dark:text-emerald-50",
+    description: "text-emerald-800/80 dark:text-emerald-200/80",
+    close: "text-emerald-700/70 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-white",
+  },
+  error: {
+    root: "border-destructive/35 bg-red-50 text-heading border-l-4 border-l-destructive dark:border-red-500/40 dark:bg-red-950/70 dark:text-red-50 dark:border-l-red-400",
+    icon: "text-red-700 dark:text-red-300",
+    title: "text-red-900 dark:text-red-50",
+    description: "text-red-800/80 dark:text-red-200/80",
+    close: "text-red-700/70 dark:text-red-300 hover:text-red-900 dark:hover:text-white",
+  },
+  warning: {
+    root: "border-amber-300 bg-amber-50 text-heading border-l-4 border-l-amber-500 dark:border-amber-500/40 dark:bg-amber-950/70 dark:text-amber-50 dark:border-l-amber-400",
+    icon: "text-amber-700 dark:text-amber-300",
+    title: "text-amber-900 dark:text-amber-50",
+    description: "text-amber-800/80 dark:text-amber-200/80",
+    close: "text-amber-700/70 dark:text-amber-300 hover:text-amber-900 dark:hover:text-white",
+  },
+  info: {
+    root: "border-sky-300 bg-sky-50 text-heading border-l-4 border-l-sky-500 dark:border-sky-500/40 dark:bg-sky-950/70 dark:text-sky-50 dark:border-l-sky-400",
+    icon: "text-sky-700 dark:text-sky-300",
+    title: "text-sky-900 dark:text-sky-50",
+    description: "text-sky-800/80 dark:text-sky-200/80",
+    close: "text-sky-700/70 dark:text-sky-300 hover:text-sky-900 dark:hover:text-white",
+  },
+  loading: {
+    root: "border-border-subtle bg-background text-heading border-l-4 border-l-muted-foreground/60 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-50 dark:border-l-slate-400",
+    icon: "text-body dark:text-slate-300",
+    title: "text-heading dark:text-slate-50",
+    description: "text-body dark:text-slate-300",
+    close: "text-muted-foreground dark:text-slate-400 hover:text-heading dark:hover:text-white",
+  },
+}
+
 function ToastProvider({ ...props }: ToastPrimitive.Provider.Props) {
   return <ToastPrimitive.Provider {...props} />
 }
@@ -30,12 +107,18 @@ function ToastViewport({ className, ...props }: ToastPrimitive.Viewport.Props) {
   )
 }
 
-function Toast({ className, ...props }: ToastPrimitive.Root.Props) {
+function Toast({
+  className,
+  toastVariant = "default",
+  ...props
+}: ToastPrimitive.Root.Props & { toastVariant?: ToastVariant }) {
   return (
     <ToastPrimitive.Root
       data-slot="toast"
+      data-toast-type={toastVariant}
       className={cn(
-        "group/toast pointer-events-auto absolute right-0 bottom-0 z-[calc(1000-var(--toast-index))] w-full origin-bottom rounded-2xl border bg-popover text-popover-foreground shadow-lg will-change-transform outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        "group/toast pointer-events-auto absolute right-0 bottom-0 z-[calc(1000-var(--toast-index))] w-full origin-bottom rounded-2xl border shadow-lg will-change-transform outline-none select-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        TOAST_STYLES[toastVariant].root,
         "[--gap:0.75rem] [--height:var(--toast-frontmost-height,var(--toast-height))] [--offset-y:calc(var(--toast-offset-y)*-1+calc(var(--toast-index)*var(--gap)*-1)+var(--toast-swipe-movement-y))] [--peek:0.75rem] [--scale:calc(max(0,1-(var(--toast-index)*0.1)))] [--shrink:calc(1-var(--scale))]",
         "h-(--height) transform-[translateX(var(--toast-swipe-movement-x))_translateY(calc(var(--toast-swipe-movement-y)-(var(--toast-index)*var(--peek))-(var(--shrink)*var(--height))))_scale(var(--scale))] [transition:transform_500ms_cubic-bezier(0.22,1,0.36,1),opacity_500ms,height_150ms]",
         "after:absolute after:top-full after:left-0 after:h-[calc(var(--gap)+1px)] after:w-full after:content-['']",
@@ -132,37 +215,27 @@ function ToastClose({
   )
 }
 
-function ToastIcon({ type }: { type: string | undefined }) {
+function ToastIcon({ type }: { type: ToastVariant }) {
   let icon: React.ReactNode = null
 
   if (type === "success") {
-    icon = (
-      <CircleCheckIcon aria-hidden="true" />
-    )
+    icon = <CircleCheckIcon aria-hidden="true" />
   }
 
   if (type === "info") {
-    icon = (
-      <InfoIcon aria-hidden="true" />
-    )
+    icon = <InfoIcon aria-hidden="true" />
   }
 
   if (type === "warning") {
-    icon = (
-      <TriangleAlertIcon aria-hidden="true" />
-    )
+    icon = <TriangleAlertIcon aria-hidden="true" />
   }
 
   if (type === "error") {
-    icon = (
-      <OctagonXIcon className="text-destructive" aria-hidden="true" />
-    )
+    icon = <OctagonXIcon aria-hidden="true" />
   }
 
   if (type === "loading") {
-    icon = (
-      <Loader2Icon className="animate-spin" aria-hidden="true" />
-    )
+    icon = <Loader2Icon className="animate-spin" aria-hidden="true" />
   }
 
   if (!icon) {
@@ -172,7 +245,10 @@ function ToastIcon({ type }: { type: string | undefined }) {
   return (
     <span
       data-slot="toast-icon"
-      className="shrink-0 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4"
+      className={cn(
+        "shrink-0 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
+        TOAST_STYLES[type].icon
+      )}
     >
       {icon}
     </span>
@@ -182,19 +258,27 @@ function ToastIcon({ type }: { type: string | undefined }) {
 function ToastList() {
   const { toasts } = ToastPrimitive.useToastManager()
 
-  return toasts.map((toastItem) => (
-    <Toast key={toastItem.id} toast={toastItem}>
-      <ToastContent>
-        <ToastIcon type={toastItem.type} />
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <ToastTitle />
-          <ToastDescription />
-        </div>
-        <ToastAction />
-        <ToastClose />
-      </ToastContent>
-    </Toast>
-  ))
+  return toasts.map((toastItem) => {
+    const toastType = toastItem.type as ToastVariant
+    const variant: ToastVariant = TOAST_VARIANTS.includes(toastType)
+      ? toastType
+      : "default"
+    const styles = TOAST_STYLES[variant]
+
+    return (
+      <Toast key={toastItem.id} toast={toastItem} toastVariant={variant}>
+        <ToastContent>
+          <ToastIcon type={variant} />
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <ToastTitle className={styles.title} />
+            <ToastDescription className={styles.description} />
+          </div>
+          <ToastAction />
+          <ToastClose className={styles.close} />
+        </ToastContent>
+      </Toast>
+    )
+  })
 }
 
 function Toaster({
