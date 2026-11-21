@@ -48,7 +48,7 @@ export default function RootLoading() {
           />
 
           {/* Your Logo Image with gentle float & subtle scale */}
-          <div className="relative z-10 h-16 w-16 animate-bounce [animation-duration:2.2s]">
+          <div className="relative z-10 h-16 w-16 animate-bounce animation-duration-[2.2s]">
             <Image
               src="/logo.png"
               alt="MentorLagbe logo"

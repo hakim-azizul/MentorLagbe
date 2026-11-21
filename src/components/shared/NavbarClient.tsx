@@ -120,10 +120,10 @@ export default function NavbarClient({ user }: NavbarClientProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${
+                className={`relative px-3.5 py-2 text-sm font-medium transition-colors after:absolute after:bottom-0 after:left-3.5 after:right-3.5 after:h-0.5 after:rounded-full after:bg-brand after:transition-transform after:duration-200 ${
                   isActive
-                    ? "bg-brand-tint text-heading font-semibold"
-                    : "text-body hover:bg-surface hover:text-heading"
+                    ? "font-semibold text-brand after:scale-x-0"
+                    : "text-body hover:text-heading after:scale-x-0 hover:after:scale-x-100"
                 }`}
               >
                 {link.name}
@@ -160,7 +160,9 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                   className="border-border-subtle text-heading hover:bg-brand-tint hover:border-brand/40 gap-2 cursor-pointer"
                 >
                   <LayoutDashboard className="h-4 w-4 text-brand" />
-                  {user?.role === "Student"? "My Class Room" : `${user?.role} Workspace`}
+                  {user?.role === "Student"
+                    ? "My Class Room"
+                    : `${user?.role} Workspace`}
                 </Button>
               </Link>
 
@@ -280,10 +282,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                     Log in
                   </Button>
                 </Link>
-                <Link
-                  href="/signup"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
+                <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
                   <Button className="w-full bg-brand hover:bg-brand-hover text-heading font-semibold">
                     Get Started
                   </Button>
