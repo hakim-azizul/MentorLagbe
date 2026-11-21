@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { tTuitionView } from "@/lib/types/tuition";
 import { fetchApprovedTuitions } from "@/lib/api/tuitionApi";
+import { TuitionCardSkeleton } from "@/components/dashboard/LoadingStates";
 
 export type tmode = "Online" | "Offline";
 
@@ -94,15 +95,7 @@ export default function FeaturedTuitions({
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array.from({ length: MAX_FEATURED }).map((_, idx) => (
-              <div
-                key={idx}
-                className="h-96 rounded-3xl border border-border-subtle bg-background animate-pulse p-6 space-y-4"
-              >
-                <div className="h-44 rounded-2xl bg-surface" />
-                <div className="h-4 w-1/3 rounded bg-surface" />
-                <div className="h-6 w-4/5 rounded bg-surface" />
-                <div className="h-4 w-full rounded bg-surface" />
-              </div>
+              <TuitionCardSkeleton key={idx} />
             ))}
           </div>
         ) : tuitions.length === 0 ? (

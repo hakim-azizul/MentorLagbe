@@ -12,7 +12,10 @@ import {
 import StatCard from "@/components/dashboard/StatCard";
 import PageHeader from "@/components/dashboard/PageHeader";
 import ErrorAlert from "@/components/dashboard/ErrorAlert";
-import { StatCardSkeleton } from "@/components/dashboard/LoadingStates";
+import {
+  StatCardSkeleton,
+  QuickLinksSkeleton,
+} from "@/components/dashboard/LoadingStates";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import { useApi } from "@/hooks/useApi";
 import { formatCurrency } from "@/lib/format";
@@ -89,6 +92,7 @@ export default function AdminOverview() {
         )}
       </div>
 
+      {loading && <QuickLinksSkeleton cards={3} />}
       {!loading && !error && (
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <QuickLink

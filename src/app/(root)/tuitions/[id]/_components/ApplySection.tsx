@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/toast";
 import {
   Dialog,
@@ -184,7 +185,7 @@ export default function ApplySection({
   // ---- session loading --------------------------------------------------
   if (isPending) {
     return (
-      <div className="h-11 w-full animate-pulse rounded-xl bg-border-subtle" />
+      <Skeleton className="h-11 w-full rounded-xl bg-surface" />
     );
   }
 
@@ -219,7 +220,7 @@ export default function ApplySection({
   // ---- student: checking ------------------------------------------------
   if (checking) {
     return (
-      <div className="h-11 w-full animate-pulse rounded-xl bg-border-subtle" />
+      <Skeleton className="h-11 w-full rounded-xl bg-surface" />
     );
   }
 

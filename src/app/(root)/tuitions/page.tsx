@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { GraduationCap } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TuitionCardSkeleton } from "@/components/dashboard/LoadingStates";
 import BrowseTuitions from "./_components/BrowseTuitions";
 
 export const metadata: Metadata = {
@@ -59,7 +60,7 @@ function BrowseSkeleton() {
       </div>
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, index) => (
-          <Skeleton key={index} className="h-96 w-full rounded-3xl" />
+          <TuitionCardSkeleton key={index} />
         ))}
       </div>
     </>

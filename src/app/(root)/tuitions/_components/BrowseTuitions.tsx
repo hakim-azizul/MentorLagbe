@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TuitionCardSkeleton } from "@/components/dashboard/LoadingStates";
 import { toast } from "@/components/ui/toast";
 import {
   Select,
@@ -391,7 +391,7 @@ export default function BrowseTuitions() {
         {loading ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
-              <Skeleton key={index} className="h-96 w-full rounded-3xl" />
+              <TuitionCardSkeleton key={index} />
             ))}
           </div>
         ) : error ? (

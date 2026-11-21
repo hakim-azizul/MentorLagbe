@@ -12,7 +12,10 @@ import {
 import StatCard from "@/components/dashboard/StatCard";
 import PageHeader from "@/components/dashboard/PageHeader";
 import ErrorAlert from "@/components/dashboard/ErrorAlert";
-import { StatCardSkeleton } from "@/components/dashboard/LoadingStates";
+import {
+  StatCardSkeleton,
+  PanelSkeleton,
+} from "@/components/dashboard/LoadingStates";
 import StatusBadge, { planTone } from "@/components/dashboard/StatusBadge";
 import { useApi } from "@/hooks/useApi";
 import type { TutorStats } from "@/lib/types/dashboard";
@@ -114,6 +117,7 @@ export default function TutorOverview({ email }: { email: string }) {
         )}
       </div>
 
+      {loading && <PanelSkeleton actions={2} />}
       {!loading && !error && (
         <div className="mt-6 rounded-3xl border border-border-subtle bg-background p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
