@@ -24,7 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useSession } from "@/lib/auth-client";
-import { ApiError } from "@/lib/api";
+import { ApiError, fetchCurrentUserProfile } from "@/lib/api";
 import {
   applyForTuition,
   checkStudentApplication,
@@ -60,7 +60,8 @@ export default function ApplySection({
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [phone, setPhone] = useState("");
+  const [profilePhone, setProfilePhone] = useState("");
+  const [phoneLoaded, setPhoneLoaded] = useState(false);
   const [preferredSchedule, setPreferredSchedule] = useState("");
   const [note, setNote] = useState("");
 
@@ -94,6 +95,28 @@ export default function ApplySection({
     };
   }, [tuitionId, role, user?.email]);
 
+  // ফোন নম্বর প্রোফাইল থেকে আসে — প্রতি আবেদনে টাইপ করতে হয় না
+  useEffect(() => {
+    if (isPending || !user?.email || role !== "student") return;
+
+    let cancelled = false;
+    fetchCurrentUserProfile()
+      .then((profile) => {
+        if (cancelled) return;
+        setProfilePhone(String(profile.phone ?? "").trim());
+        setPhoneLoaded(true);
+      })
+      .catch(() => {
+        if (!cancelled) setPhoneLoaded(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isPending, role, user?.email]);
+
+  const phoneValid = profilePhone.length >= 8;
+
   // ডেরাইভড অবস্থা — ইফেক্টে সিঙ্ক setState করতে হয় না
   const freshResult = checkResult?.key === checkKey ? checkResult : null;
   const checking =
@@ -107,7 +130,6 @@ export default function ApplySection({
 
   const handleSubmit = async () => {
     const missing: string[] = [];
-    if (!phone.trim()) missing.push("phone number");
     if (!preferredSchedule.trim()) missing.push("preferred schedule");
     if (!note.trim()) missing.push("learning note");
     if (missing.length) {
@@ -115,6 +137,17 @@ export default function ApplySection({
       setFormError(message);
       toast.add({
         title: "Missing details",
+        description: message,
+        type: "error",
+      });
+      return;
+    }
+    if (!phoneValid) {
+      const message =
+        "Add a valid phone number (at least 8 characters) to your profile before applying.";
+      setFormError(message);
+      toast.add({
+        title: "Complete your profile",
         description: message,
         type: "error",
       });
@@ -136,7 +169,6 @@ export default function ApplySection({
         tuitionId,
         studentEmail: user.email,
         studentName: user.name || "",
-        phone: phone.trim(),
         preferredSchedule: preferredSchedule.trim(),
         note: note.trim(),
       });
@@ -240,15 +272,32 @@ export default function ApplySection({
       </div>
     );
   }
-  // ---- student: already applied ----------------------------------------
-  const initialPhone = user?.phone && user.phone.trim().length >= 8 ? user.phone.trim() : "";
   // ---- student: apply now ----------------------------------------------
+  const phoneMissing = phoneLoaded && !phoneValid;
   return (
     <>
+      {phoneMissing && (
+        <div className="mb-3 flex flex-col gap-2 rounded-2xl border border-amber-500/30 bg-amber-50 p-4 dark:border-amber-500/40 dark:bg-amber-950/40">
+          <p className="flex items-start gap-2 text-xs leading-relaxed text-heading">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+            Add a valid phone number (at least 8 characters) to your profile
+            before applying — tutors need it to contact you.
+          </p>
+          <Link
+            href="/dashboard/profile"
+            className="inline-flex items-center gap-1.5 self-start text-xs font-semibold text-brand hover:underline"
+          >
+            Complete your profile
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      )}
+
       <Button
         type="button"
         onClick={() => handleOpenChange(true)}
-        className="w-full cursor-pointer rounded-xl bg-brand py-5 font-semibold text-heading shadow-xs transition-all hover:bg-brand-hover"
+        disabled={!phoneLoaded || !phoneValid}
+        className="w-full cursor-pointer rounded-xl bg-brand py-5 font-semibold text-heading shadow-xs transition-all hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
         Apply Now
       </Button>
@@ -260,8 +309,8 @@ export default function ApplySection({
               Apply for {tuitionTitle}
             </DialogTitle>
             <DialogDescription className="text-body">
-              Share your contact details and preferred schedule — the tutor will
-              get back to you.
+              Share your preferred schedule and a short note — your profile
+              phone number is shared automatically.
             </DialogDescription>
           </DialogHeader>
 
@@ -272,23 +321,6 @@ export default function ApplySection({
           )}
 
           <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label
-                htmlFor="apply-phone"
-                className="text-xs font-bold uppercase tracking-wider text-heading"
-              >
-                Phone Number *
-              </Label>
-              <Input
-                id="apply-phone"
-                type="tel"
-                value={phone || initialPhone}
-                onChange={(event) => setPhone(event.target.value)}
-                placeholder="01XXXXXXXXX"
-                className="border-border-subtle bg-background"
-              />
-            </div>
-
             <div className="space-y-1.5">
               <Label
                 htmlFor="apply-schedule"

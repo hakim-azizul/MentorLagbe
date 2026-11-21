@@ -131,16 +131,16 @@ export default function Applicants({ email }: { email: string }) {
                       <p className="font-semibold text-heading">
                         {application.studentName}
                       </p>
-                      <p className="flex items-center gap-1 text-xs text-body">
-                        <Mail className="h-3 w-3" />
-                        {application.studentEmail}
-                      </p>
-                      {application.studentPhone && (
-                        <p className="flex items-center gap-1 text-xs text-body">
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-body">
+                        <span className="flex items-center gap-1">
+                          <Mail className="h-3 w-3" />
+                          {application.studentEmail}
+                        </span>
+                        <span className="flex items-center gap-1">
                           <Phone className="h-3 w-3" />
-                          {application.studentPhone}
-                        </p>
-                      )}
+                          {application.studentPhone?.trim() || "Not provided"}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <p className="max-w-52 truncate text-sm font-medium text-heading">

@@ -10,7 +10,6 @@ export type tApplyTuitionPayload = {
   tuitionId: string;
   studentEmail: string;
   studentName: string;
-  phone: string;
   preferredSchedule: string;
   note: string;
 };
