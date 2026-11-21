@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import {
   Select,
   SelectContent,
@@ -117,10 +118,20 @@ export default function PostTuition({ email }: { email: string }) {
 
     if (!file.type.startsWith("image/")) {
       setServerError("Please choose a valid image file.");
+      toast.add({
+        title: "Invalid file",
+        description: "Please choose a valid image file.",
+        type: "error",
+      });
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       setServerError("Image must be smaller than 5 MB.");
+      toast.add({
+        title: "Image too large",
+        description: "Banner images must be smaller than 5 MB.",
+        type: "error",
+      });
       return;
     }
 
@@ -168,7 +179,14 @@ export default function PostTuition({ email }: { email: string }) {
     setServerError(null);
     setSuccess(null);
 
-    if (!validate()) return;
+    if (!validate()) {
+      toast.add({
+        title: "Check your details",
+        description: "Please correct the highlighted fields and try again.",
+        type: "error",
+      });
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -197,16 +215,31 @@ export default function PostTuition({ email }: { email: string }) {
       clearImage();
       setSuccess("Tuition posted successfully! It is now pending admin approval.");
       refetchStats();
+      toast.add({
+        title: "Tuition posted",
+        description: "Your post is live after admin approval.",
+        type: "success",
+      });
     } catch (error) {
       if (error instanceof ApiError && error.status === 403) {
         setLimitMessage(error.message);
         setLimitOpen(true);
+        toast.add({
+          title: "Free plan limit reached",
+          description: error.message,
+          type: "warning",
+        });
       } else {
-        setServerError(
+        const message =
           error instanceof ApiError
             ? error.message
-            : "Could not post the tuition. Please try again."
-        );
+            : "Could not post the tuition. Please try again.";
+        setServerError(message);
+        toast.add({
+          title: "Posting failed",
+          description: message,
+          type: "error",
+        });
       }
     } finally {
       setSubmitting(false);

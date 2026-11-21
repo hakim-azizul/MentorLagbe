@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import PageHeader from "@/components/dashboard/PageHeader";
 import EmptyState from "@/components/dashboard/EmptyState";
 import ErrorAlert from "@/components/dashboard/ErrorAlert";
@@ -39,12 +40,22 @@ export default function Applicants({ email }: { email: string }) {
         body: { status },
       });
       refetch();
+      toast.add({
+        title: "Application updated",
+        description: `The application was ${status}.`,
+        type: "success",
+      });
     } catch (err) {
-      setActionError(
+      const message =
         err instanceof ApiError
           ? err.message
-          : "Could not update the application."
-      );
+          : "Could not update the application.";
+      setActionError(message);
+      toast.add({
+        title: "Update failed",
+        description: message,
+        type: "error",
+      });
     } finally {
       setBusyId(null);
     }

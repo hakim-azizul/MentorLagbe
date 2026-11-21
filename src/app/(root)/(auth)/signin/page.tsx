@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Mail, Lock, ArrowRight, Eye, EyeOff, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/toast";
 import { signIn } from "@/lib/auth-client";
 import { clearJwtCache } from "@/lib/api";
 
@@ -34,6 +35,11 @@ export default function LoginPage() {
     // সাধারণ ভ্যালিডেশন
     if (!formData.email || !formData.password) {
       setError("Please fill in all required fields.");
+      toast.add({
+        title: "Missing details",
+        description: "Enter both your email and password to sign in.",
+        type: "error",
+      });
       return;
     }
 
@@ -52,6 +58,11 @@ export default function LoginPage() {
       }
 
       console.log("Sign in successful:", data);
+      toast.add({
+        title: "Welcome back!",
+        description: "You have signed in successfully.",
+        type: "success",
+      });
 
       // পুরনো সাইন-আউট-আগের JWT ক্যাশ বাতিল — নতুন সেশনের টোকেনই যাবে
       clearJwtCache();
@@ -59,11 +70,16 @@ export default function LoginPage() {
       router.push("/");
       router.refresh();
     } catch (err) {
-      setError(
+      const message =
         err instanceof Error
           ? err.message
-          : "Something went wrong during sign in."
-      );
+          : "Something went wrong during sign in.";
+      setError(message);
+      toast.add({
+        title: "Sign in failed",
+        description: message,
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 import {
   Dialog,
   DialogContent,
@@ -109,10 +110,23 @@ export default function ApplySection({
     if (!preferredSchedule.trim()) missing.push("preferred schedule");
     if (!note.trim()) missing.push("learning note");
     if (missing.length) {
-      setFormError(`Please fill in: ${missing.join(", ")}.`);
+      const message = `Please fill in: ${missing.join(", ")}.`;
+      setFormError(message);
+      toast.add({
+        title: "Missing details",
+        description: message,
+        type: "error",
+      });
       return;
     }
-    if (!user?.email || !checkKey) return;
+    if (!user?.email || !checkKey) {
+      toast.add({
+        title: "Sign in required",
+        description: "Please sign in as a student to apply for this tuition.",
+        type: "warning",
+      });
+      return;
+    }
 
     setSubmitting(true);
     setFormError(null);
@@ -128,6 +142,11 @@ export default function ApplySection({
       setCheckResult({ key: checkKey, hasApplied: true });
       setSuccess(true);
       setOpen(false);
+      toast.add({
+        title: "Application sent",
+        description: "The tutor will review your application soon.",
+        type: "success",
+      });
     } catch (error) {
       if (error instanceof ApiError) {
         // ডায়লগের বাইরেও অবস্থা সঠিক রাখতে 409-কে "আবেদন করা আছে" ধরে নেওয়া হয়
@@ -135,11 +154,27 @@ export default function ApplySection({
           setCheckResult({ key: checkKey, hasApplied: true });
           setSuccess(false);
           setOpen(false);
+          toast.add({
+            title: "Already applied",
+            description: "You have already applied to this tuition.",
+            type: "warning",
+          });
         } else {
           setFormError(error.message);
+          toast.add({
+            title: "Application failed",
+            description: error.message,
+            type: "error",
+          });
         }
       } else {
-        setFormError("Something went wrong. Please try again.");
+        const message = "Something went wrong. Please try again.";
+        setFormError(message);
+        toast.add({
+          title: "Application failed",
+          description: message,
+          type: "error",
+        });
       }
     } finally {
       setSubmitting(false);

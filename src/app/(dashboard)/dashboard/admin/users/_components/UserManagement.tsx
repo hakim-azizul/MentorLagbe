@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/toast";
 import {
   Select,
   SelectContent,
@@ -57,10 +58,20 @@ export default function UserManagement({ adminEmail }: { adminEmail: string }) {
         body: { role },
       });
       refetch();
+      toast.add({
+        title: "Role updated",
+        description: `This account is now a ${role}.`,
+        type: "success",
+      });
     } catch (err) {
-      setActionError(
-        err instanceof ApiError ? err.message : "Could not update the role."
-      );
+      const message =
+        err instanceof ApiError ? err.message : "Could not update the role.";
+      setActionError(message);
+      toast.add({
+        title: "Role update failed",
+        description: message,
+        type: "error",
+      });
     } finally {
       setBusyId(null);
     }

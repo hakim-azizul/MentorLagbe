@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/components/ui/toast";
 import PageHeader from "@/components/dashboard/PageHeader";
 import ErrorAlert from "@/components/dashboard/ErrorAlert";
 import { useSession } from "@/lib/auth-client";
@@ -101,6 +102,11 @@ export default function ProfileForm({ initial }: ProfileFormProps) {
     setSessionExpired(false);
     setLoading(true);
     setLoadTick((tick) => tick + 1);
+    toast.add({
+      title: "Retrying",
+      description: "Loading your profile again.",
+      type: "info",
+    });
   };
 
   const setField = <K extends keyof tUserEdit>(key: K, value: tUserEdit[K]) => {
@@ -125,10 +131,20 @@ export default function ProfileForm({ initial }: ProfileFormProps) {
 
     if (!file.type.startsWith("image/")) {
       setServerError("Please choose a valid image file.");
+      toast.add({
+        title: "Invalid file",
+        description: "Please choose a valid image file.",
+        type: "error",
+      });
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       setServerError("Image must be smaller than 5 MB.");
+      toast.add({
+        title: "Image too large",
+        description: "Profile photos must be smaller than 5 MB.",
+        type: "error",
+      });
       return;
     }
 
@@ -138,12 +154,22 @@ export default function ProfileForm({ initial }: ProfileFormProps) {
       setForm((previous) => ({ ...previous, image: url }));
       setImgError(false);
       setPhotoUploaded(true);
+      toast.add({
+        title: "Photo uploaded",
+        description: "Save your profile to keep the new photo.",
+        type: "success",
+      });
     } catch (error) {
-      setServerError(
+      const message =
         error instanceof Error
           ? error.message
-          : "Image upload failed. Please try again."
-      );
+          : "Image upload failed. Please try again.";
+      setServerError(message);
+      toast.add({
+        title: "Upload failed",
+        description: message,
+        type: "error",
+      });
     } finally {
       setUploading(false);
     }
@@ -154,6 +180,11 @@ export default function ProfileForm({ initial }: ProfileFormProps) {
     setPhotoUploaded(false);
     // আগের ফাইল সিলেকশনও মুছে যাক — একই ফাইল আবার বাছাই করা যায়
     if (photoInputRef.current) photoInputRef.current.value = "";
+    toast.add({
+      title: "Photo removed",
+      description: "Save your profile to apply this change.",
+      type: "info",
+    });
   };
 
   const getInitials = (name: string) => {
@@ -185,7 +216,14 @@ export default function ProfileForm({ initial }: ProfileFormProps) {
     setServerError(null);
     setSuccess(null);
 
-    if (!validate()) return;
+    if (!validate()) {
+      toast.add({
+        title: "Check your details",
+        description: "Fix the highlighted fields before saving.",
+        type: "error",
+      });
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -208,17 +246,27 @@ export default function ProfileForm({ initial }: ProfileFormProps) {
       setMeta({ role: updated.role, plan: updated.plan });
       setPhotoUploaded(false);
       setSuccess("Profile updated successfully.");
+      toast.add({
+        title: "Profile saved",
+        description: "Your changes are now live across the dashboard.",
+        type: "success",
+      });
 
       // সাইডবার/ন্যাভবার/শেল — নতুন নাম ও ছবি সব জায়গায় ছড়িয়ে পড়বে
       void refetch();
       router.refresh();
     } catch (error) {
       setSessionExpired(error instanceof ApiError && error.status === 401);
-      setServerError(
+      const message =
         error instanceof ApiError
           ? error.message
-          : "Could not update your profile. Please try again."
-      );
+          : "Could not update your profile. Please try again.";
+      setServerError(message);
+      toast.add({
+        title: "Save failed",
+        description: message,
+        type: "error",
+      });
     } finally {
       setSubmitting(false);
     }

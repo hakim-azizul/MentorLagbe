@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import PageHeader from "@/components/dashboard/PageHeader";
 import EmptyState from "@/components/dashboard/EmptyState";
 import ErrorAlert from "@/components/dashboard/ErrorAlert";
@@ -43,12 +44,22 @@ export default function TuitionApproval() {
         body: { approvalStatus },
       });
       refetch();
+      toast.add({
+        title: "Tuition reviewed",
+        description: `This tuition was ${approvalStatus}.`,
+        type: "success",
+      });
     } catch (err) {
-      setActionError(
+      const message =
         err instanceof ApiError
           ? err.message
-          : "Could not update the approval status."
-      );
+          : "Could not update the approval status.";
+      setActionError(message);
+      toast.add({
+        title: "Review failed",
+        description: message,
+        type: "error",
+      });
     } finally {
       setBusyId(null);
     }

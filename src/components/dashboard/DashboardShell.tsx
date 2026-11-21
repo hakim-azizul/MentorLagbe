@@ -16,6 +16,7 @@ import {
 import { useSession, authClient } from "@/lib/auth-client";
 import { clearJwtCache } from "@/lib/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import {
   dashboardRoutes,
@@ -60,8 +61,18 @@ export default function DashboardShell({
   const handleSignOut = async () => {
     try {
       await authClient.signOut();
+      toast.add({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+        type: "success",
+      });
     } catch (error) {
       console.error("Sign out error:", error);
+      toast.add({
+        title: "Sign out failed",
+        description: "Could not sign you out. Please try again.",
+        type: "error",
+      });
     }
     // সাইন-আউটে পুরনো JWT মেয়াদ শেষ না হওয়া পর্যন্ত কাজ করা বন্ধ করতে ক্যাশ বাতিল
     clearJwtCache();

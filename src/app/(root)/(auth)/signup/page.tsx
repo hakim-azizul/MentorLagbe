@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/toast";
 import { signUp } from "@/lib/auth-client";
 import { clearJwtCache } from "@/lib/api";
 
@@ -45,11 +46,21 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     if (!formData.name || !formData.email || !formData.password) {
       setError("Please fill in all required fields.");
+      toast.add({
+        title: "Missing details",
+        description: "Fill in your name, email and password to continue.",
+        type: "error",
+      });
       return;
     }
 
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters long.");
+      toast.add({
+        title: "Password too short",
+        description: "Use at least 6 characters for your password.",
+        type: "error",
+      });
       return;
     }
 
@@ -74,6 +85,11 @@ const handleSubmit = async (e: React.FormEvent) => {
       }
 
       console.log("Sign up successful:", data);
+      toast.add({
+        title: "Account created",
+        description: "Welcome to MentorLagbe! You are signed in.",
+        type: "success",
+      });
 
       // নতুন অ্যাকাউন্টের টোকেন নতুন করে আনতে ক্যাশ বাতিল
       clearJwtCache();
@@ -81,11 +97,16 @@ const handleSubmit = async (e: React.FormEvent) => {
       router.push("/");
       router.refresh();
     } catch (err) {
-      setError(
+      const message =
         err instanceof Error
           ? err.message
-          : "Something went wrong during sign up."
-      );
+          : "Something went wrong during sign up.";
+      setError(message);
+      toast.add({
+        title: "Sign up failed",
+        description: message,
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }

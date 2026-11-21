@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/components/ui/toast";
 import {
   Select,
   SelectContent,
@@ -241,9 +242,21 @@ export default function BrowseTuitions() {
   const clearFilters = () => {
     setSearchInput("");
     applyParams({ search: null, subject: null, classLevel: null, mode: null });
+    toast.add({
+      title: "Filters cleared",
+      description: "Showing all approved tuitions again.",
+      type: "info",
+    });
   };
 
-  const handleRefresh = () => setRefreshKey((key) => key + 1);
+  const handleRefresh = () => {
+    setRefreshKey((key) => key + 1);
+    toast.add({
+      title: "Refreshing tuitions",
+      description: "Loading the latest listings.",
+      type: "info",
+    });
+  };
 
   return (
     <>

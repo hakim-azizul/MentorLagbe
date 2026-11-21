@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "@/components/ui/toast";
 import {
   Select,
   SelectContent,
@@ -82,10 +83,20 @@ export default function MyTuitions({ email }: { email: string }) {
         body: { isActive: !tuition.isActive },
       });
       refetch();
+      toast.add({
+        title: "Tuition updated",
+        description: `This tuition is now ${tuition.isActive ? "paused" : "active"}.`,
+        type: "success",
+      });
     } catch (err) {
-      setBannerError(
-        err instanceof ApiError ? err.message : "Could not update the status."
-      );
+      const message =
+        err instanceof ApiError ? err.message : "Could not update the status.";
+      setBannerError(message);
+      toast.add({
+        title: "Status update failed",
+        description: message,
+        type: "error",
+      });
     } finally {
       setTogglingId(null);
     }
@@ -99,10 +110,20 @@ export default function MyTuitions({ email }: { email: string }) {
       await apiFetch(`/api/tuitions/${deleting._id}`, { method: "DELETE" });
       setDeleting(null);
       refetch();
+      toast.add({
+        title: "Tuition deleted",
+        description: "The tuition and its applications were removed.",
+        type: "success",
+      });
     } catch (err) {
-      setActionError(
-        err instanceof ApiError ? err.message : "Could not delete this tuition."
-      );
+      const message =
+        err instanceof ApiError ? err.message : "Could not delete this tuition.";
+      setActionError(message);
+      toast.add({
+        title: "Delete failed",
+        description: message,
+        type: "error",
+      });
     } finally {
       setDeletingBusy(false);
     }
@@ -334,6 +355,15 @@ function EditTuitionDialog({
     setError(null);
   };
 
+  const failValidation = (message: string) => {
+    setError(message);
+    toast.add({
+      title: "Check your details",
+      description: message,
+      type: "error",
+    });
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
@@ -341,23 +371,23 @@ function EditTuitionDialog({
     const fee = Number(form.monthlyFee);
     const days = Number(form.daysPerWeek);
     if (form.title.trim().length < 5) {
-      setError("Title must be at least 5 characters.");
+      failValidation("Title must be at least 5 characters.");
       return;
     }
     if (!Number.isFinite(fee) || fee <= 0) {
-      setError("Enter a valid monthly fee.");
+      failValidation("Enter a valid monthly fee.");
       return;
     }
     if (!Number.isInteger(days) || days < 1 || days > 7) {
-      setError("Days per week must be between 1 and 7.");
+      failValidation("Days per week must be between 1 and 7.");
       return;
     }
     if (form.mode !== "Online" && !form.location.trim()) {
-      setError("Location is required for offline/hybrid tuitions.");
+      failValidation("Location is required for offline/hybrid tuitions.");
       return;
     }
     if (form.description.trim().length < 15) {
-      setError("Description must be at least 15 characters.");
+      failValidation("Description must be at least 15 characters.");
       return;
     }
 
@@ -383,10 +413,20 @@ function EditTuitionDialog({
         },
       });
       onSaved();
+      toast.add({
+        title: "Tuition updated",
+        description: "Your changes have been saved.",
+        type: "success",
+      });
     } catch (err) {
-      setError(
-        err instanceof ApiError ? err.message : "Could not save the changes."
-      );
+      const message =
+        err instanceof ApiError ? err.message : "Could not save the changes.";
+      setError(message);
+      toast.add({
+        title: "Save failed",
+        description: message,
+        type: "error",
+      });
     } finally {
       setSaving(false);
     }

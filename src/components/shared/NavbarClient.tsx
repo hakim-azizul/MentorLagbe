@@ -13,6 +13,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,9 +55,25 @@ export default function NavbarClient({ user }: NavbarClientProps) {
       const { error } = await authClient.signOut();
       if (error) {
         console.error("Sign out error:", error.message);
+        toast.add({
+          title: "Sign out failed",
+          description: error.message || "Please try again.",
+          type: "error",
+        });
+      } else {
+        toast.add({
+          title: "Signed out",
+          description: "You have been signed out successfully.",
+          type: "success",
+        });
       }
     } catch (error) {
       console.error("Sign out error:", error);
+      toast.add({
+        title: "Sign out failed",
+        description: "Could not sign you out. Please try again.",
+        type: "error",
+      });
     }
     // সাইন-আউটে পুরনো JWT মেয়াদ শেষ না হওয়া পর্যন্ত কাজ করা বন্ধ করতে ক্যাশ বাতিল
     clearJwtCache();

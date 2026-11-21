@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
 import PageHeader from "@/components/dashboard/PageHeader";
 import EmptyState from "@/components/dashboard/EmptyState";
 import ErrorAlert from "@/components/dashboard/ErrorAlert";
@@ -41,10 +42,22 @@ export default function MyApplications({ email }: { email: string }) {
       await apiFetch(`/api/applications/${targetId}`, { method: "DELETE" });
       setTargetId(null);
       refetch();
+      toast.add({
+        title: "Application canceled",
+        description: "Your application has been withdrawn.",
+        type: "success",
+      });
     } catch (err) {
-      setActionError(
-        err instanceof ApiError ? err.message : "Could not cancel this application."
-      );
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : "Could not cancel this application.";
+      setActionError(message);
+      toast.add({
+        title: "Cancellation failed",
+        description: message,
+        type: "error",
+      });
     } finally {
       setSubmitting(false);
     }
