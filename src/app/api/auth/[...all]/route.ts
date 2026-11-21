@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { auth, ensureAuthDb } from "@/lib/auth";
 import { toNextJsHandler } from "better-auth/next-js";
 
 const handlers = toNextJsHandler(auth);
@@ -35,6 +35,7 @@ function signedOutResponse(): Response {
 export async function GET(request: Request): Promise<Response> {
     let response: Response;
     try {
+        await ensureAuthDb();
         response = await handlers.GET(request);
     } catch (error) {
         if (!isSessionReadFailure(error)) throw error;
@@ -58,8 +59,27 @@ export async function GET(request: Request): Promise<Response> {
     return response;
 }
 
-/** POST/PATCH/PUT/DELETE — সাইন-ইন/আউট ইত্যাদি, এরর অক্ষত যাবে। */
-export const POST = handlers.POST;
-export const PATCH = handlers.PATCH;
-export const PUT = handlers.PUT;
-export const DELETE = handlers.DELETE;
+/**
+ * POST/PATCH/PUT/DELETE — সাইন-ইন/সাইন-আপ/সাইন-আউট ইত্যাদি।
+ * Serve-less cold start-এ MongoDB কানেকশনের আগে adapter ধরা হলে 500 আসত —
+ * তাই আগে কানেকশন await করে তারপর আসল হ্যান্ডলারে দিই (এরর অক্ষত যাবে)।
+ */
+export async function POST(request: Request) {
+    await ensureAuthDb();
+    return handlers.POST(request);
+}
+
+export async function PATCH(request: Request) {
+    await ensureAuthDb();
+    return handlers.PATCH(request);
+}
+
+export async function PUT(request: Request) {
+    await ensureAuthDb();
+    return handlers.PUT(request);
+}
+
+export async function DELETE(request: Request) {
+    await ensureAuthDb();
+    return handlers.DELETE(request);
+}

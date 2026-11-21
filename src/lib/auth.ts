@@ -14,11 +14,21 @@ if (!dbUri) {
 const client = new MongoClient(dbUri)
 const db = client.db("MentorLagbeDb")
 
-// কানেকশন যাচাই — অসুবিধা হলে লগে স্পষ্ট করে জানাবে (non-blocking)
-client.connect().then(
-    () => console.log("[auth] MongoDB connected"),
-    (error) => console.error("[auth] MongoDB connection failed:", error)
-)
+// Serverless-এ cold start-এ প্রথম রিকোয়েস্টে adapter-এর startSession() চালানোর
+// আগে কানেকশন শেষ হওয়া আবশ্যক — তাই non-blocking connect-এর বদলে একটিমাত্র
+// promise ক্যাশ করে সব auth হ্যান্ডলারকে সেটা await করতে দিই।
+let connection: Promise<typeof client> | null = null;
+
+export function ensureAuthDb(): Promise<typeof client> {
+    if (!connection) {
+        connection = client.connect().catch((error) => {
+            connection = null; // পরের invocation-এ আবার চেষ্টা করতে পারবে
+            console.error("[auth] MongoDB connection failed:", error);
+            throw error;
+        });
+    }
+    return connection;
+}
 
 export const auth = betterAuth({
     emailAndPassword: {
