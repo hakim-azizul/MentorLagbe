@@ -14,7 +14,7 @@ import { roleHome } from "@/config/dashboardRoutes";
 import type { tUserRole } from "@/lib/types/user";
 
 export const metadata: Metadata = {
-  title: "Upgrade to Pro — MentorLagbe",
+  title: "Upgrade to Pro",
   description: "Upgrade your MentorLagbe account to Pro and unlock unlimited access.",
 };
 

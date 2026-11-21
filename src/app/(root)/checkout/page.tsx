@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+
+export const metadata: Metadata = { title: "Checkout" };
 
 /**
  * পুরনো `/checkout` সফলতা-রুটের ব্যাকওয়ার্ড-কম্প্যাটিবল রিডাইরেক্ট।

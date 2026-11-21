@@ -56,7 +56,7 @@ export default function SavedTuitions({ email }: { email: string }) {
         <EmptyState
           icon={Bookmark}
           title="No saved tuitions yet"
-          description="Tap the bookmark icon on any tuition to keep it here for later."
+          description="Use the bookmark icon on any tuition to save it here for later."
           action={
             <Link href="/tuitions">
               <Button className="gap-2 bg-brand font-semibold text-heading hover:bg-brand-hover">

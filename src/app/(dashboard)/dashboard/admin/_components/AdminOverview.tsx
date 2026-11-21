@@ -97,18 +97,18 @@ export default function AdminOverview() {
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <QuickLink
             href="/dashboard/admin/users"
-            title="User Management"
-            description="Change roles between student, tutor and admin."
+            title="Manage Users"
+            description="Update account roles between student, tutor and admin."
           />
           <QuickLink
             href="/dashboard/admin/tuitions"
-            title="Tuition Approval"
+            title="Review Tuitions"
             description={`${pending} post${pending === 1 ? "" : "s"} waiting for a decision.`}
           />
           <QuickLink
             href="/dashboard/admin/transactions"
-            title="Transactions"
-            description="All Stripe payments recorded on the platform."
+            title="Payments"
+            description="View every payment recorded on the platform."
           />
         </div>
       )}

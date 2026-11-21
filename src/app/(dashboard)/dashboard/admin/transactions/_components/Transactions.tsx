@@ -45,8 +45,8 @@ export default function Transactions() {
   return (
     <div className="mx-auto max-w-6xl">
       <PageHeader
-        title="Transactions"
-        description="Every Stripe payment recorded on MentorLagbe."
+        title="Payments"
+        description="Every payment recorded on MentorLagbe."
         actions={
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-body pointer-events-none" />

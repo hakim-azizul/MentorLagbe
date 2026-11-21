@@ -3,7 +3,7 @@ import { requireDashboardUser } from "@/lib/core/dashboardAuth";
 import Applicants from "./_components/Applicants";
 
 export const metadata: Metadata = {
-  title: "Manage Applicants | MentorLagbe",
+  title: "Manage Applicants",
 };
 
 export default async function ApplicantsPage() {

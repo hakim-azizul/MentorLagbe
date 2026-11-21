@@ -3,7 +3,7 @@ import { requireDashboardUser } from "@/lib/core/dashboardAuth";
 import ProfileForm from "./_components/ProfileForm";
 
 export const metadata: Metadata = {
-  title: "My Profile | MentorLagbe",
+  title: "My Profile",
 };
 
 /**

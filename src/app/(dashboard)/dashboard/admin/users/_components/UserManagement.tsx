@@ -80,7 +80,7 @@ export default function UserManagement({ adminEmail }: { adminEmail: string }) {
   return (
     <div className="mx-auto max-w-6xl">
       <PageHeader
-        title="User Management"
+        title="Manage Users"
         description="Search every registered account and update its role."
         actions={
           <div className="relative w-full sm:w-72">

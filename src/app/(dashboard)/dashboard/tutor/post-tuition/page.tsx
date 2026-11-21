@@ -3,7 +3,7 @@ import { requireDashboardUser } from "@/lib/core/dashboardAuth";
 import PostTuition from "./_components/PostTuition";
 
 export const metadata: Metadata = {
-  title: "Post a Tuition | MentorLagbe",
+  title: "Post a Tuition",
 };
 
 export default async function PostTuitionPage() {

@@ -3,7 +3,7 @@ import { requireDashboardUser } from "@/lib/core/dashboardAuth";
 import UserManagement from "./_components/UserManagement";
 
 export const metadata: Metadata = {
-  title: "User Management | MentorLagbe",
+  title: "User Management",
 };
 
 export default async function UserManagementPage() {

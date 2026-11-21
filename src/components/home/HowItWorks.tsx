@@ -43,13 +43,13 @@ export default function HowItWorks() {
         <div className="mx-auto max-w-2xl text-center mb-16">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand-tint px-3.5 py-1.5 text-xs font-semibold text-heading">
             <Sparkles className="h-3.5 w-3.5 text-brand" />
-            <span>Simple & Streamlined Workflow</span>
+            <span>A Simple Path to Better Learning</span>
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">
             How MentorLagbe Works
           </h2>
           <p className="mt-3 text-base text-body">
-            A frictionless ecosystem designed to connect eager learners with verified expert mentors in just a few simple steps[cite: 9].
+            Connect with the right mentor in four simple steps — search, compare, apply, and start learning.
           </p>
         </div>
 

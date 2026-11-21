@@ -194,7 +194,7 @@ export default function ApplySection({
     return (
       <Link href="/signin" className="block">
         <Button className="w-full cursor-pointer gap-2 rounded-xl bg-brand py-5 font-semibold text-heading shadow-xs transition-all hover:bg-brand-hover">
-          Sign in as Student to Apply
+          Sign In to Apply
           <ArrowRight className="h-4 w-4" />
         </Button>
       </Link>
@@ -345,7 +345,7 @@ export default function ApplySection({
                   Submitting...
                 </>
               ) : (
-                "Submit Application"
+                "Apply Now"
               )}
             </Button>
           </DialogFooter>

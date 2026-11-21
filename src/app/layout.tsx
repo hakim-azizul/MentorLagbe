@@ -15,8 +15,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MentorLagbe",
-  description: "Smart Tuition & Mentorship Platform",
+  title: {
+    default: "MentorLagbe — Tuition & Mentorship Platform",
+    template: "%s | MentorLagbe",
+  },
+  description:
+    "Find verified tutors and structured mentorship batches, or share your expertise as a tutor on MentorLagbe.",
+  openGraph: {
+    type: "website",
+    siteName: "MentorLagbe",
+    title: "MentorLagbe — Tuition & Mentorship Platform",
+    description: "Learn from verified tutors or teach students on MentorLagbe.",
+  },
 };
 
 /**

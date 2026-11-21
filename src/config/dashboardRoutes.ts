@@ -51,18 +51,22 @@ export const dashboardRoutes: Record<tUserRole, DashboardRoute[]> = {
       href: "/dashboard/tutor/my-tuitions",
       icon: BookMarked,
     },
-    { label: "Applicants", href: "/dashboard/tutor/applicants", icon: Users },
+    {
+      label: "My Applicants",
+      href: "/dashboard/tutor/applicants",
+      icon: Users,
+    },
   ],
   admin: [
     { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard },
-    { label: "User Management", href: "/dashboard/admin/users", icon: Users },
+    { label: "Manage Users", href: "/dashboard/admin/users", icon: Users },
     {
-      label: "Tuition Approval",
+      label: "Review Tuitions",
       href: "/dashboard/admin/tuitions",
       icon: ShieldCheck,
     },
     {
-      label: "Transactions",
+      label: "Payments",
       href: "/dashboard/admin/transactions",
       icon: CreditCard,
     },

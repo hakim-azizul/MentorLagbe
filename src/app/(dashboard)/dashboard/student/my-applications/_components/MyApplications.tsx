@@ -89,7 +89,7 @@ export default function MyApplications({ email }: { email: string }) {
         <EmptyState
           icon={FileText}
           title="No applications yet"
-          description="You haven't applied to any tuition yet. Browse the listings and send your first application."
+          description="You haven't applied to any tuitions yet. Browse the listings and send your first application."
           action={
             <Link
               href="/tuitions"

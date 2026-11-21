@@ -161,7 +161,7 @@ export default function TuitionDetails({
                 <div className="flex items-center gap-2.5 border-t border-border-subtle pt-4">
                   <BookmarkButton tuitionId={tuition._id} className="size-10" />
                   <span className="text-xs font-medium text-body">
-                    Save this tuition to your list
+                    Add to Saved Tuitions
                   </span>
                 </div>
 

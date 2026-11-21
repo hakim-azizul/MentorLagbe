@@ -69,7 +69,7 @@ export default function Applicants({ email }: { email: string }) {
   return (
     <div className="mx-auto max-w-6xl">
       <PageHeader
-        title="Applicants"
+        title="My Applicants"
         description="Students who applied to your tuitions — accept or reject them in one click."
         actions={
           <Link

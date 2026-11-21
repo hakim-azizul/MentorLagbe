@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import CheckoutSuccess from "./_components/CheckoutSuccess";
 
 export const metadata: Metadata = {
-  title: "Payment successful — MentorLagbe",
+  title: "Payment Successful",
   description: "Verify your Stripe payment and activate your MentorLagbe Pro plan.",
 };
 

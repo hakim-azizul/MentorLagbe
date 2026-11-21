@@ -6,7 +6,7 @@ import { TuitionCardSkeleton } from "@/components/dashboard/LoadingStates";
 import BrowseTuitions from "./_components/BrowseTuitions";
 
 export const metadata: Metadata = {
-  title: "Browse Tuitions | MentorLagbe",
+  title: "Browse Tuitions",
   description:
     "Explore approved and active tuition listings from verified tutors — search, filter by subject, class level and mode, and sort by date or fee.",
 };

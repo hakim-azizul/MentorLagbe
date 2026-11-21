@@ -42,8 +42,8 @@ interface NavbarClientProps {
 
 const navLinks = [
   { name: "Home", href: "/" },
-  { name: "Tuition Batches", href: "/tuitions" },
-  { name: "Pricing", href: "/pricing" },
+  { name: "Browse Tuitions", href: "/tuitions" },
+  { name: "Plans & Pricing", href: "/pricing" },
 ];
 
 export default function NavbarClient({ user }: NavbarClientProps) {
@@ -160,9 +160,11 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                   className="border-border-subtle text-heading hover:bg-brand-tint hover:border-brand/40 gap-2 cursor-pointer"
                 >
                   <LayoutDashboard className="h-4 w-4 text-brand" />
-                  {user?.role === "Student"
-                    ? "My Class Room"
-                    : `${user?.role} Workspace`}
+                  {user?.role === "student"
+                    ? "My Workspace"
+                    : user?.role
+                      ? `${user.role.charAt(0).toUpperCase()}${user.role.slice(1)} Workspace`
+                      : "Workspace"}
                 </Button>
               </Link>
 

@@ -76,7 +76,7 @@ export default function TuitionApproval() {
   return (
     <div className="mx-auto max-w-6xl">
       <PageHeader
-        title="Tuition Approval"
+        title="Review Tuitions"
         description="Moderate every tuition post submitted on the platform."
         actions={
           <Link

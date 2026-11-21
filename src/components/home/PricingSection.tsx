@@ -59,7 +59,7 @@ const plansData: Record<AudienceTab, PlanItem[]> = {
         "Early access to newly posted batches",
         "24/7 dedicated student support",
       ],
-      ctaText: "Subscribe with Stripe",
+      ctaText: "Upgrade to Pro",
     },
   ],
   tutor: [
@@ -93,7 +93,7 @@ const plansData: Record<AudienceTab, PlanItem[]> = {
         "Detailed student enrollment analytics",
         "Zero platform commission on direct bookings",
       ],
-      ctaText: "Subscribe with Stripe",
+      ctaText: "Upgrade to Pro",
     },
   ],
 };
@@ -119,13 +119,13 @@ export default function PricingSection() {
         <div className="mx-auto max-w-2xl text-center">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand-tint px-3.5 py-1.5 text-xs font-semibold text-heading">
             <Sparkles className="h-3.5 w-3.5 text-brand" />
-            <span>Flexible Plans for Everyone</span>
+            <span>Plans That Grow With You</span>
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">
             Simple, Transparent Pricing
           </h2>
           <p className="mt-3 text-base text-body">
-            Start for free and upgrade anytime to unlock verified badges, unlimited posts, and priority mentorship booking.
+            Start free and upgrade when ready for unlimited applications, a verified badge, and priority booking.
           </p>
 
           {/* Role Toggle Switch (For Tutors / For Students) */}

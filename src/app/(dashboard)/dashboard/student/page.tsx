@@ -3,7 +3,7 @@ import { requireDashboardUser } from "@/lib/core/dashboardAuth";
 import StudentOverview from "./_components/StudentOverview";
 
 export const metadata: Metadata = {
-  title: "Student Dashboard | MentorLagbe",
+  title: "Student Dashboard",
 };
 
 export default async function StudentDashboardPage() {

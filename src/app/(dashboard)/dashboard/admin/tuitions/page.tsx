@@ -3,7 +3,7 @@ import { requireDashboardUser } from "@/lib/core/dashboardAuth";
 import TuitionApproval from "./_components/TuitionApproval";
 
 export const metadata: Metadata = {
-  title: "Tuition Approval | MentorLagbe",
+  title: "Tuition Approval",
 };
 
 export default async function TuitionApprovalPage() {

@@ -72,13 +72,13 @@ export default function FeaturedTuitions({
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand-tint px-3.5 py-1.5 text-xs font-semibold text-heading mb-3">
               <Sparkles className="h-3.5 w-3.5 text-brand" />
-              <span>Verified Listings</span>
+              <span>Handpicked for You</span>
             </div>
             <h2 className="text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">
               Featured Tuition & Mentorship Batches
             </h2>
             <p className="mt-2 text-base text-body max-w-2xl">
-              Explore the latest approved and active tuition listings from verified expert mentors and tutors.
+              Browse approved tuitions from verified tutors and find the right fit for your class, subject and schedule.
             </p>
           </div>
           <Link href="/tuitions">

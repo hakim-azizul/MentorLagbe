@@ -3,7 +3,7 @@ import { requireDashboardUser } from "@/lib/core/dashboardAuth";
 import SavedTuitions from "./_components/SavedTuitions";
 
 export const metadata: Metadata = {
-  title: "Saved Tuitions | MentorLagbe",
+  title: "Saved Tuitions",
   description: "All the tuitions you bookmarked, in one place.",
 };
 

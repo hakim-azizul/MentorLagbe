@@ -3,7 +3,7 @@ import { requireDashboardUser } from "@/lib/core/dashboardAuth";
 import Transactions from "./_components/Transactions";
 
 export const metadata: Metadata = {
-  title: "Transactions | MentorLagbe",
+  title: "Transactions",
 };
 
 export default async function TransactionsPage() {

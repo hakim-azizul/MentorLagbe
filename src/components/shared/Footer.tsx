@@ -172,7 +172,7 @@ export default function Footer() {
                   href="/batches"
                   className="hover:text-brand transition-colors"
                 >
-                  Tuition Batches
+                  Browse Tuitions
                 </Link>
               </li>
               <li>
@@ -180,7 +180,7 @@ export default function Footer() {
                   href="/pricing"
                   className="hover:text-brand transition-colors"
                 >
-                  Pricing & Pro
+                  Plans & Pricing
                 </Link>
               </li>
             </ul>
@@ -197,7 +197,7 @@ export default function Footer() {
                   href="/signup"
                   className="hover:text-brand transition-colors"
                 >
-                  Register as Student
+                  Join as a Student
                 </Link>
               </li>
               <li>
@@ -213,7 +213,7 @@ export default function Footer() {
                   href="/signin"
                   className="hover:text-brand transition-colors"
                 >
-                  Sign In to Account
+                  Sign In
                 </Link>
               </li>
             </ul>

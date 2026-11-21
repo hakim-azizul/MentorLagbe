@@ -131,7 +131,7 @@ export default function HeroBanner() {
                   size="lg"
                   className="bg-heading hover:bg-heading/90 text-background font-semibold px-6 rounded-xl gap-2 cursor-pointer"
                 >
-                  Browse All Tuitions
+                  Explore Tuitions
                   <ArrowRight className="h-4 w-4 text-brand" />
                 </Button>
               </Link>
@@ -141,7 +141,7 @@ export default function HeroBanner() {
                   variant="outline"
                   className="border-border-subtle bg-background hover:bg-surface text-heading font-semibold px-6 rounded-xl cursor-pointer"
                 >
-                  Become a Mentor
+                  Teach on MentorLagbe
                 </Button>
               </Link>
             </div>
