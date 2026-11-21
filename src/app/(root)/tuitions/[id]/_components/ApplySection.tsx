@@ -266,7 +266,7 @@ export default function ApplySection({
           </DialogHeader>
 
           {formError && (
-            <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-600">
+            <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400">
               {formError}
             </p>
           )}

@@ -396,7 +396,7 @@ export default function BrowseTuitions() {
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-border-subtle bg-surface py-16 text-center">
-            <AlertTriangle className="h-10 w-10 text-amber-500" />
+            <AlertTriangle className="h-10 w-10 text-amber-500 dark:text-amber-400" />
             <p className="text-sm text-body">{error}</p>
             <Button
               type="button"

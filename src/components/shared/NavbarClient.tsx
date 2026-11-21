@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
+import ThemeToggle from "@/components/shared/ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -131,8 +132,9 @@ export default function NavbarClient({ user }: NavbarClientProps) {
           })}
         </nav>
 
-        {/* Right: Auth Actions / User Profile */}
+        {/* Right: Theme toggle + Auth Actions / User Profile */}
         <div className="hidden md:flex items-center gap-3">
+          <ThemeToggle />
           {!user ? (
             <>
               <Link href="/signin">
@@ -215,7 +217,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
 
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    className="cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-600 flex items-center gap-2"
+                    className="flex cursor-pointer items-center gap-2 text-red-600 focus:bg-red-50 focus:text-red-600 dark:text-red-400 dark:focus:bg-red-950/60 dark:focus:text-red-300"
                   >
                     <LogOut className="h-4 w-4" />
                     Log out
@@ -226,19 +228,22 @@ export default function NavbarClient({ user }: NavbarClientProps) {
           )}
         </div>
 
-        {/* Mobile Hamburger Button */}
-        <button
-          type="button"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="inline-flex items-center justify-center rounded-lg p-2 text-heading hover:bg-surface md:hidden"
-          aria-label="Toggle Menu"
-        >
-          {mobileMenuOpen ? (
-            <X className="h-6 w-6" />
-          ) : (
-            <Menu className="h-6 w-6" />
-          )}
-        </button>
+        {/* Mobile: theme toggle + hamburger */}
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="inline-flex items-center justify-center rounded-lg p-2 text-heading hover:bg-surface"
+            aria-label="Toggle Menu"
+          >
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Dropdown Drawer */}
@@ -332,7 +337,7 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                   <Button
                     variant="outline"
                     onClick={handleLogout}
-                    className="w-full border-red-200 text-red-600 hover:bg-red-50 gap-1.5"
+                    className="w-full gap-1.5 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-950/50"
                   >
                     <LogOut className="h-4 w-4" />
                     Log out

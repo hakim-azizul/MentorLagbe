@@ -238,7 +238,9 @@ export default function MyTuitions({ email }: { email: string }) {
                       <span
                         className={cn(
                           "text-xs font-semibold",
-                          tuition.isActive ? "text-[#047857]" : "text-body"
+                          tuition.isActive
+                            ? "text-emerald-700 dark:text-emerald-400"
+                            : "text-body"
                         )}
                       >
                         {tuition.isActive ? "Active" : "Closed"}
@@ -444,7 +446,7 @@ function EditTuitionDialog({
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           {error && (
-            <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-600">
+            <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400">
               {error}
             </p>
           )}

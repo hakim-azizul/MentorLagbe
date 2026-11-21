@@ -17,6 +17,7 @@ import { useSession, authClient } from "@/lib/auth-client";
 import { clearJwtCache } from "@/lib/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/components/ui/toast";
+import ThemeToggle from "@/components/shared/ThemeToggle";
 import { cn } from "@/lib/utils";
 import {
   dashboardRoutes,
@@ -230,7 +231,7 @@ export default function DashboardShell({
             <button
               type="button"
               onClick={handleSignOut}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-background px-3 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 cursor-pointer"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-background px-3 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-950/50 cursor-pointer"
             >
               <LogOut className="h-4 w-4" />
               Log out
@@ -261,20 +262,21 @@ export default function DashboardShell({
                 {dashboardTitles[role]}
               </p>
             </div>
-            {user?.role !== "admin" && (
-              <div>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              {user?.role !== "admin" && (
                 <span
                   className={cn(
                     "hidden rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider sm:inline-block",
                     plan === "pro"
-                      ? "bg-brand text-heading"
+                      ? "bg-brand text-primary-foreground"
                       : "border border-border-subtle bg-surface text-body",
                   )}
                 >
                   {plan} plan
                 </span>
-              </div>
-            )}
+              )}
+            </div>
           </header>
           <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
         </div>
@@ -364,7 +366,7 @@ export default function DashboardShell({
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-background px-3 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 cursor-pointer"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-background px-3 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-950/50 cursor-pointer"
               >
                 <LogOut className="h-4 w-4" />
                 Log out

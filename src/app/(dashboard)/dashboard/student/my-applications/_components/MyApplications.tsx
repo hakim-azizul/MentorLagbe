@@ -154,7 +154,7 @@ export default function MyApplications({ email }: { email: string }) {
                         setActionError(null);
                         setTargetId(application._id);
                       }}
-                      className="border-border-subtle text-heading hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:hover:border-border-subtle disabled:hover:bg-transparent"
+                      className="border-border-subtle text-heading hover:border-red-300 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-500/40 dark:hover:bg-red-950/50 dark:hover:text-red-400 disabled:hover:border-border-subtle disabled:hover:bg-transparent"
                       title={
                         application.status !== "pending"
                           ? "Only pending applications can be cancelled"

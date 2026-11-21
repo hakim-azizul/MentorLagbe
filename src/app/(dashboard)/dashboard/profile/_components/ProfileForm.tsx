@@ -403,7 +403,7 @@ export default function ProfileForm({ initial }: ProfileFormProps) {
                 size="sm"
                 disabled={uploading || !form.image}
                 onClick={removePhoto}
-                className="shrink-0 border-border-subtle text-body hover:bg-red-50 hover:text-red-600"
+                className="shrink-0 border-border-subtle text-body hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50 dark:hover:text-red-400"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 Remove

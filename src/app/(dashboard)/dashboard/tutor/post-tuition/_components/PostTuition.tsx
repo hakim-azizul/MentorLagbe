@@ -255,7 +255,7 @@ export default function PostTuition({ email }: { email: string }) {
 
       {/* Free plan limit info */}
       {limitReached && (
-        <div className="mb-6 flex flex-col gap-3 rounded-3xl border border-amber-500/30 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-6 flex flex-col gap-3 rounded-3xl border border-amber-500/30 bg-amber-50 p-4 dark:border-amber-500/40 dark:bg-amber-950/40 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-2.5">
             <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
             <p className="text-sm font-medium text-amber-800">
@@ -481,7 +481,7 @@ export default function PostTuition({ email }: { email: string }) {
                     <button
                       type="button"
                       onClick={clearImage}
-                      className="absolute right-1.5 top-1.5 rounded-full bg-background/90 p-1 text-heading shadow-sm transition-colors hover:bg-red-50 hover:text-red-600 cursor-pointer"
+                      className="absolute right-1.5 top-1.5 rounded-full bg-background/90 p-1 text-heading shadow-sm transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50 dark:hover:text-red-400 cursor-pointer"
                       aria-label="Remove image"
                     >
                       <X className="h-3.5 w-3.5" />

@@ -13,12 +13,15 @@ export type BadgeTone =
   | "brand";
 
 const toneStyles: Record<BadgeTone, string> = {
-  success: "border-brand/30 bg-brand-tint text-[#047857]",
-  warning: "border-amber-500/30 bg-amber-50 text-amber-700",
-  danger: "border-red-500/30 bg-red-50 text-red-600",
+  success:
+    "border-brand/30 bg-brand-tint text-emerald-700 dark:text-emerald-300",
+  warning:
+    "border-amber-500/30 bg-amber-50 text-amber-700 dark:border-amber-500/40 dark:bg-amber-950/50 dark:text-amber-300",
+  danger:
+    "border-red-500/30 bg-red-50 text-red-600 dark:border-red-500/40 dark:bg-red-950/50 dark:text-red-300",
   neutral: "border-border-subtle bg-surface text-body",
-  info: "border-sky-500/30 bg-sky-50 text-sky-700",
-  brand: "border-brand/40 bg-brand text-heading font-bold",
+  info: "border-sky-500/30 bg-sky-50 text-sky-700 dark:border-sky-500/40 dark:bg-sky-950/50 dark:text-sky-300",
+  brand: "border-brand/40 bg-brand text-primary-foreground font-bold",
 };
 
 interface StatusBadgeProps {

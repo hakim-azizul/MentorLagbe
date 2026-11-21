@@ -104,7 +104,7 @@ export default function TuitionApproval() {
       ) : (
         <>
           {pendingCount > 0 && (
-            <div className="mb-5 flex items-center gap-2.5 rounded-2xl border border-amber-500/30 bg-amber-50 px-4 py-3">
+            <div className="mb-5 flex items-center gap-2.5 rounded-2xl border border-amber-500/30 bg-amber-50 px-4 py-3 dark:border-amber-500/40 dark:bg-amber-950/40">
               <ShieldCheck className="h-4 w-4 shrink-0 text-amber-600" />
               <p className="text-sm font-medium text-amber-800">
                 {pendingCount} tuition post{pendingCount === 1 ? "" : "s"} waiting

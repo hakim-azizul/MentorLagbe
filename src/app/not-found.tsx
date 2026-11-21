@@ -123,7 +123,7 @@ export default function NotFound() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Link
               href="/"
-              className="flex items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-3 text-sm font-semibold text-white transition-all hover:opacity-95 active:scale-[0.99]"
+              className="flex items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:opacity-95 active:scale-[0.99]"
             >
               <Home className="h-4 w-4 shrink-0" />
               <span>Home</span>

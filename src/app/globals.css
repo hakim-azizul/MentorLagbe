@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* প্রজেক্টে ডার্ক মোড নেই, তাই OS ডার্ক প্রেফারেন্সে shadcn কম্পোনেন্ট যেন আংশিক না বদলায় */
+/* OS-এর ডার্ক প্রেফারেন্স নয় — শুধু `.dark` ক্লাস থাকলে ডার্ক মোড চলবে */
 @custom-variant dark (&:is(.dark *));
 
 @theme {
@@ -42,6 +42,58 @@
   --color-border: #E2E8F0; /* border-subtle */
   --color-input: #E2E8F0;
   --color-ring: #00D66C;
+}
+
+/*
+ * ডার্ক মোড — `.dark` ক্লাস document.documentElement-এ বসানো হয়।
+ * 60-30-10 প্যালেট অপরিবর্তিত রেখে শুধু সারফেস/টেক্সট/অ্যাকশন টোন বদলায়।
+ */
+.dark {
+  color-scheme: dark;
+
+  /* 60% — principle */
+  --color-background: #0B0F19;
+  --color-surface: #111827;
+
+  /* 30% — secondary */
+  --color-heading: #F8FAFC;
+  --color-body: #94A3B8;
+  --color-border-subtle: #1E293B;
+
+  /* 10% — accent */
+  --color-brand: #00E575;
+  --color-brand-hover: #00C464;
+  --color-brand-tint: #064E3B;
+
+  /* shadcn/ui semantic tokens — modal, popover, input, card, button */
+  --color-foreground: #F8FAFC;
+  --color-card: #111827;
+  --color-card-foreground: #F8FAFC;
+  --color-popover: #111827;
+  --color-popover-foreground: #F8FAFC;
+  --color-muted: #1E293B;
+  --color-muted-foreground: #94A3B8;
+  --color-primary: #00E575;
+  --color-primary-foreground: #0B0F19;
+  --color-secondary: #1E293B;
+  --color-secondary-foreground: #F8FAFC;
+  --color-accent: #1E293B;
+  --color-accent-foreground: #F8FAFC;
+  --color-destructive: #F87171;
+  --color-destructive-foreground: #0B0F19;
+  --color-border: #1E293B;
+  --color-input: #1E293B;
+  --color-ring: #00E575;
+}
+
+/*
+ * ডার্ক মোডে ব্র্যান্ড গ্রিন উজ্জ্বল (#00E575) — সাদা টেক্সটের বদলে
+ * গাঢ় primary-foreground ব্যবহার করলেই বাটন/ব্যাজে কনট্রাস্ট ঠিক থাকে।
+ * লেয়ার-বাইরের (unlayered) নিয়ম — Tailwind-এর `.text-heading` ইউটিলিটিকে
+ * ওভাররাইড করতে পারে (layered CSS specificity-র চেয়ে শক্তিশালী)।
+ */
+.dark .bg-brand {
+  color: var(--color-primary-foreground);
 }
 
 @layer base {
