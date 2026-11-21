@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { formatDate, formatCurrency } from "@/lib/format";
 import type { tTuitionDetails, tmode } from "@/lib/types/tuition";
+import BookmarkButton from "@/components/shared/BookmarkButton";
 import ApplySection from "./ApplySection";
 
 function ModeIcon({ mode }: { mode: tmode }) {
@@ -155,6 +156,14 @@ export default function TuitionDetails({
                     </p>
                   </div>
                 )}
+
+                {/* বুকমার্ক — শিক্ষার্থীরা পরে Saved Tuitions-এ খুঁজে পাবে */}
+                <div className="flex items-center gap-2.5 border-t border-border-subtle pt-4">
+                  <BookmarkButton tuitionId={tuition._id} className="size-10" />
+                  <span className="text-xs font-medium text-body">
+                    Save this tuition to your list
+                  </span>
+                </div>
 
                 {/* রোল-ভিত্তিক আবেদন ফ্লো */}
                 <ApplySection

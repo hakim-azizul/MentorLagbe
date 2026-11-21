@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TuitionCardSkeleton } from "@/components/dashboard/LoadingStates";
+import BookmarkButton from "@/components/shared/BookmarkButton";
 import { toast } from "@/components/ui/toast";
 import {
   Select,
@@ -458,10 +459,13 @@ export default function BrowseTuitions() {
                     </span>
                   </div>
 
-                  <div className="absolute top-3 right-3">
+                  <div className="absolute top-3 right-12">
                     <span className="rounded-lg bg-background/90 px-2.5 py-1 text-xs font-semibold text-heading shadow-xs backdrop-blur-md">
                       {tuition.classLevel}
                     </span>
+                  </div>
+                  <div className="absolute top-3 right-3">
+                    <BookmarkButton tuitionId={tuition._id} />
                   </div>
                 </div>
 

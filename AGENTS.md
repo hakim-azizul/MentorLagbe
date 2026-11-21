@@ -68,6 +68,9 @@ src/
       dashboard/{student,tutor,admin}/
         page.tsx                # thin async server wrapper: requireDashboardUser(role) → client component
         _components/*.tsx       # the actual "use client" page bodies
+      dashboard/student/saved-tuitions/
+        page.tsx                # student-only wrapper → SavedTuitions client view
+        _components/SavedTuitions.tsx  # bookmarked tuition grid, remove, empty/error/skeleton states
       dashboard/profile/
         page.tsx                # /dashboard/profile — server wrapper: requireDashboardUser() → ProfileForm
         _components/ProfileForm.tsx  # client form: fetch profile, ImgBB upload, PATCH save
@@ -89,6 +92,7 @@ src/
       applicationApi.ts         # applyForTuition(payload), checkStudentApplication(tuitionId, email)
       userApi.ts                # fetchCurrentUserProfile(), updateUserProfile(payload: tUserEdit)
       paymentApi.ts             # checkoutVerify(sessionId, signal?) → POST /payments/checkout-verify
+      savedTuitionApi.ts        # fetchSavedTuitionIds(), fetchSavedTuitions(), toggleSavedTuition(tuitionId)
     format.ts                   # currency/date helpers
     auth.ts                     # server better-auth config
     auth-client.ts              # createAuthClient → { authClient, signIn, signUp, useSession } (type-only auth import)
@@ -133,6 +137,8 @@ All backend logic lives in **`../mentor-server/index.js`** (Express + native Mon
 - `GET /api/applications/check?tuitionId=&email=` — → `{ hasApplied: boolean }` (`400` when a param is missing).
 
 **Bearer-JWT-guarded (`Authorization: Bearer <JWT>` from Better Auth, role enforced):** `POST|GET|PATCH|DELETE /api/tuitions` (owner-or-admin edits; `GET /api/tuitions/tutor`), `GET|PATCH|DELETE /api/applications` (`/student`, `/tutor`, `/:id/status`), `/api/dashboard/{student,tutor,admin}/stats`, `/api/admin/*` (users, tuitions, transactions). **`GET|PATCH /api/profile`** — any authenticated role (no role gate): reads/updates only the caller's own `user` doc (identity from `req.user.id`), PATCH whitelists `name, email, image, phone, bio`, changed email is checked case-insensitively against other accounts (`409` on clash), missing name/email → `400`, returns `{ _id, name, email, image, phone, bio, role, plan, createdAt }`.
+
+**Saved tuitions (students only):** dedicated `saveduitions` collection with `student`/`tuition` `ObjectId`s, `createdAt`/`updatedAt`, and a unique compound index `{ student: 1, tuition: 1 }` created at boot. `GET /api/saved-tuitions/ids` → `{ savedIds: string[] }` for active bookmark state; `GET /api/saved-tuitions` → saved tuition views (same shape as `GET /api/tuitions`, plus `savedAt`), newest-first, deleted-tuition refs filtered out; `POST /api/saved-tuitions/toggle` `{ tuitionId }` → `{ saved: boolean, _id? }` (404 unknown tuition, 400 invalid id). Identity always comes from `req.user.id`; deleting a tuition also removes its bookmarks. The client shares IDs via `SavedTuitionsProvider` (root layout) and renders `BookmarkButton` on cards/details.
 
 **Payments / Stripe (public, no Bearer JWT):**
 

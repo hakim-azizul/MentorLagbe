@@ -7,6 +7,7 @@ import {
   Users,
   ShieldCheck,
   CreditCard,
+  Bookmark,
 } from "lucide-react";
 import type { tUserRole } from "@/lib/types/user";
 
@@ -31,6 +32,11 @@ export const dashboardRoutes: Record<tUserRole, DashboardRoute[]> = {
       label: "My Applications",
       href: "/dashboard/student/my-applications",
       icon: FileText,
+    },
+    {
+      label: "Saved Tuitions",
+      href: "/dashboard/student/saved-tuitions",
+      icon: Bookmark,
     },
   ],
   tutor: [

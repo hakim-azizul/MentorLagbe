@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { tTuitionView } from "@/lib/types/tuition";
 import { fetchApprovedTuitions } from "@/lib/api/tuitionApi";
 import { TuitionCardSkeleton } from "@/components/dashboard/LoadingStates";
+import BookmarkButton from "@/components/shared/BookmarkButton";
 
 export type tmode = "Online" | "Offline";
 
@@ -156,11 +157,14 @@ export default function FeaturedTuitions({
                         </span>
                       </div>
 
-                      {/* Class Level Badge */}
-                      <div className="absolute top-3 right-3">
+                      {/* Class Level Badge + Bookmark */}
+                      <div className="absolute top-3 right-12">
                         <span className="rounded-lg bg-background/90 backdrop-blur-md px-2.5 py-1 text-xs font-semibold text-heading shadow-xs">
                           {item.classLevel}
                         </span>
+                      </div>
+                      <div className="absolute top-3 right-3">
+                        <BookmarkButton tuitionId={item._id} />
                       </div>
                     </div>
 

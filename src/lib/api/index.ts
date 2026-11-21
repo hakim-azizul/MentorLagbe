@@ -14,3 +14,4 @@ export * from "./tuitionApi";
 export * from "./applicationApi";
 export * from "./userApi";
 export * from "./paymentApi";
+export * from "./savedTuitionApi";
