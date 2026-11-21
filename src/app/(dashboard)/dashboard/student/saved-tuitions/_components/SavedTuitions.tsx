@@ -9,6 +9,7 @@ import ErrorAlert from "@/components/dashboard/ErrorAlert";
 import EmptyState from "@/components/dashboard/EmptyState";
 import { TuitionCardSkeleton } from "@/components/dashboard/LoadingStates";
 import BookmarkButton from "@/components/shared/BookmarkButton";
+import { useSavedTuitions } from "@/components/shared/SavedTuitionsProvider";
 import { useApi } from "@/hooks/useApi";
 import { formatCurrency } from "@/lib/format";
 import type { tTuitionView } from "@/lib/types/tuition";
@@ -21,12 +22,17 @@ export default function SavedTuitions({ email }: { email: string }) {
     "/api/saved-tuitions",
   );
   const tuitions = data ?? [];
+  const { plan, limit } = useSavedTuitions();
+  const usageLabel =
+    plan === "pro"
+      ? `${tuitions.length} saved · Pro plan — unlimited`
+      : `${tuitions.length} of ${limit ?? 5} bookmarks used · Free plan`;
 
   return (
     <div className="mx-auto max-w-6xl">
       <PageHeader
         title="Saved Tuitions"
-        description={`Bookmarks for ${email} — open a tuition or remove it anytime.`}
+        description={`${usageLabel} · ${email} — open a tuition or remove it anytime.`}
         actions={
           <Link
             href="/tuitions"

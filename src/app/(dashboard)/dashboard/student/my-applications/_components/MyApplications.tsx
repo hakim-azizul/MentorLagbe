@@ -45,7 +45,7 @@ export default function MyApplications({ email }: { email: string }) {
       toast.add({
         title: "Application canceled",
         description: "Your application has been withdrawn.",
-        type: "success",
+        type: "destructive",
       });
     } catch (err) {
       const message =

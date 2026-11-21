@@ -84,9 +84,11 @@ export default function MyTuitions({ email }: { email: string }) {
       });
       refetch();
       toast.add({
-        title: "Tuition updated",
-        description: `This tuition is now ${tuition.isActive ? "paused" : "active"}.`,
-        type: "success",
+        title: tuition.isActive ? "Tuition deactivated" : "Tuition activated",
+        description: tuition.isActive
+          ? "This tuition is now paused and hidden from students."
+          : "This tuition is active again.",
+        type: tuition.isActive ? "destructive" : "success",
       });
     } catch (err) {
       const message =
@@ -113,7 +115,7 @@ export default function MyTuitions({ email }: { email: string }) {
       toast.add({
         title: "Tuition deleted",
         description: "The tuition and its applications were removed.",
-        type: "success",
+        type: "destructive",
       });
     } catch (err) {
       const message =

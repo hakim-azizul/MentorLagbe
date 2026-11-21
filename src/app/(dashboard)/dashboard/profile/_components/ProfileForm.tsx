@@ -183,7 +183,7 @@ export default function ProfileForm({ initial }: ProfileFormProps) {
     toast.add({
       title: "Photo removed",
       description: "Save your profile to apply this change.",
-      type: "info",
+      type: "destructive",
     });
   };
 

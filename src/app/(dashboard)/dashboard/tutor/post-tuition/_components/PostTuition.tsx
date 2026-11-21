@@ -227,7 +227,7 @@ export default function PostTuition({ email }: { email: string }) {
         toast.add({
           title: "Free plan limit reached",
           description: error.message,
-          type: "warning",
+          type: "destructive",
         });
       } else {
         const message =

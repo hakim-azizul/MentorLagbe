@@ -45,9 +45,12 @@ export default function TuitionApproval() {
       });
       refetch();
       toast.add({
-        title: "Tuition reviewed",
+        title:
+          approvalStatus === "rejected"
+            ? "Tuition rejected"
+            : "Tuition approved",
         description: `This tuition was ${approvalStatus}.`,
-        type: "success",
+        type: approvalStatus === "rejected" ? "destructive" : "success",
       });
     } catch (err) {
       const message =

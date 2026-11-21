@@ -41,9 +41,12 @@ export default function Applicants({ email }: { email: string }) {
       });
       refetch();
       toast.add({
-        title: "Application updated",
+        title:
+          status === "rejected"
+            ? "Application rejected"
+            : "Application accepted",
         description: `The application was ${status}.`,
-        type: "success",
+        type: status === "rejected" ? "destructive" : "success",
       });
     } catch (err) {
       const message =

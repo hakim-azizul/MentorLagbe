@@ -13,7 +13,7 @@ import {
   fetchSavedTuitionIds,
   toggleSavedTuition,
 } from "@/lib/api/savedTuitionApi";
-import type { tUserRole } from "@/lib/types/user";
+import type { tUserPlan, tUserRole } from "@/lib/types/user";
 
 type SavedTuitionsContextValue = {
   /** সেভ করা টিউশনের আইডি — কার্ড/ডিটেইলে সক্রিয় অবস্থা দেখাতে। */
@@ -23,6 +23,9 @@ type SavedTuitionsContextValue = {
   /** শিক্ষার্থী কিনা — বুকমার্ক অ্যাকশন শুধু তাদেরই অনুমোদিত। */
   canSave: boolean;
   role: tUserRole | null;
+  plan: tUserPlan | null;
+  /** Free = 5, Pro = null (unlimited). */
+  limit: number | null;
   sessionPending: boolean;
   /** অপটিমিস্টিক আপডেট + সার্ভার কনফার্মেশন; এরর থ্রো করে (টোস্ট কম্পোনেন্ট ধরে)। */
   toggle: (tuitionId: string) => Promise<boolean>;
@@ -44,7 +47,9 @@ export function SavedTuitionsProvider({
 }) {
   const { data: session, isPending } = useSession();
   const role = (session?.user?.role ?? null) as tUserRole | null;
+  const plan = (session?.user?.plan ?? null) as tUserPlan | null;
   const canSave = role === "student";
+  const limit = plan === "pro" ? null : 5;
 
   const [savedIds, setSavedIds] = useState<Set<string>>(() => new Set());
   const [idsLoaded, setIdsLoaded] = useState(false);
@@ -113,10 +118,12 @@ export function SavedTuitionsProvider({
       loading: canSave && (!idsLoaded || isPending),
       canSave,
       role,
+      plan,
+      limit,
       sessionPending: isPending,
       toggle,
     }),
-    [canSave, savedIds, idsLoaded, isPending, role, toggle],
+    [canSave, savedIds, idsLoaded, isPending, role, plan, limit, toggle],
   );
 
   return (

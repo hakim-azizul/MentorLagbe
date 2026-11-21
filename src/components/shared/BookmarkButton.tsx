@@ -27,12 +27,14 @@ export default function BookmarkButton({
     loading,
     canSave,
     role,
+    limit,
     sessionPending,
     toggle,
   } = useSavedTuitions();
   const [pending, setPending] = useState(false);
 
   const saved = savedIds.has(tuitionId);
+  const limitReached = !saved && limit !== null && savedIds.size >= limit;
   const label = saved ? "Remove from saved tuitions" : "Save tuition";
   const disabled = pending || loading || sessionPending;
 
@@ -58,6 +60,14 @@ export default function BookmarkButton({
       });
       return;
     }
+    if (limitReached) {
+      toast.add({
+        title: "Bookmark limit reached",
+        description: `Free students can save up to ${limit ?? 5} tuitions. Upgrade to Pro for unlimited bookmarks.`,
+        type: "warning",
+      });
+      return;
+    }
     if (disabled) return;
 
     setPending(true);
@@ -69,7 +79,7 @@ export default function BookmarkButton({
         description: nextSaved
           ? "Find it anytime in Saved Tuitions."
           : "This tuition was removed from your saved list.",
-        type: nextSaved ? "success" : "info",
+        type: nextSaved ? "success" : "destructive",
       });
     } catch (error) {
       toast.add({

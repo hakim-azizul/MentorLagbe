@@ -13,6 +13,7 @@ type ToastVariant =
   | "default"
   | "success"
   | "error"
+  | "destructive"
   | "warning"
   | "info"
   | "loading"
@@ -21,6 +22,7 @@ const TOAST_VARIANTS: ToastVariant[] = [
   "default",
   "success",
   "error",
+  "destructive",
   "warning",
   "info",
   "loading",
@@ -58,6 +60,14 @@ const TOAST_STYLES: Record<
   },
   error: {
     root: "border-destructive/35 bg-red-50 text-heading border-l-4 border-l-destructive dark:border-red-500/40 dark:bg-red-950/70 dark:text-red-50 dark:border-l-red-400",
+    icon: "text-red-700 dark:text-red-300",
+    title: "text-red-900 dark:text-red-50",
+    description: "text-red-800/80 dark:text-red-200/80",
+    close: "text-red-700/70 dark:text-red-300 hover:text-red-900 dark:hover:text-white",
+  },
+  // `error`-এর মতোই লাল — রিজেক্ট/ডিলিট/আনসেভ ইত্যাদি ডেস্ট্রাকটিভ অ্যাকশনে ব্যবহার
+  destructive: {
+    root: "border-destructive/40 bg-red-50 text-heading border-l-4 border-l-destructive dark:border-destructive/50 dark:bg-red-950/70 dark:text-red-50 dark:border-l-destructive",
     icon: "text-red-700 dark:text-red-300",
     title: "text-red-900 dark:text-red-50",
     description: "text-red-800/80 dark:text-red-200/80",
@@ -230,7 +240,7 @@ function ToastIcon({ type }: { type: ToastVariant }) {
     icon = <TriangleAlertIcon aria-hidden="true" />
   }
 
-  if (type === "error") {
+  if (type === "error" || type === "destructive") {
     icon = <OctagonXIcon aria-hidden="true" />
   }
 
