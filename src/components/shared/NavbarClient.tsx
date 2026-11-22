@@ -25,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { authClient } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { clearJwtCache } from "@/lib/api";
 
 interface NavbarUser {
@@ -46,10 +46,17 @@ const navLinks = [
   { name: "Plans & Pricing", href: "/pricing" },
 ];
 
-export default function NavbarClient({ user }: NavbarClientProps) {
+export default function NavbarClient({ user: serverUser }: NavbarClientProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
+
+  // Navbar-এর server prop শুধু SSR fallback — লগইন/লগআউটের পর client
+  // session atom-ই সত্য-উৎস, নাহলে Router Cache-এর পুরনো RSC দেখা যায়।
+  const { data: session, isPending } = useSession();
+  const user: NavbarUser | null = isPending
+    ? serverUser
+    : ((session?.user as NavbarUser | undefined) ?? null);
 
   const handleLogout = async () => {
     try {
