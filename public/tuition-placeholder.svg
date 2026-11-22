@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" fill="none">
+  <rect width="800" height="450" fill="#ECFDF5"/>
+  <rect x="40" y="40" width="720" height="370" rx="32" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="2"/>
+  <g transform="translate(400 205)" stroke="#00B85C" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M-72 -28 H-12 C4 -28 16 -16 16 0 V56 H-12 C-44 56 -72 28 -72 -4 V-28 Z"/>
+    <path d="M72 -28 H12 C-4 -28 -16 -16 -16 0 V56 H12 C44 56 72 28 72 -4 V-28 Z"/>
+    <path d="M16 0 H-16"/>
+  </g>
+  <text x="400" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#0F172A">MentorLagbe</text>
+  <text x="400" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#475569">Tuition preview coming soon</text>
+</svg>

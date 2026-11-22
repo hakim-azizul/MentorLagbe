@@ -133,7 +133,7 @@ export default function FeaturedTuitions({
                       <SafeImage
                         src={
                           item.bannerImage ||
-                          "https://i.ibb.co/Q7T1d591/Grow-the-community.png"
+                          "/tuition-placeholder.svg"
                         }
                         alt={item.title}
                         fill

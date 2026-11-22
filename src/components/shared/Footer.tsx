@@ -161,7 +161,7 @@ export default function Footer() {
             <ul className="space-y-2.5 text-sm">
               <li>
                 <Link
-                  href="/tutors"
+                  href="/tuitions"
                   className="hover:text-brand transition-colors"
                 >
                   Find Tutors
@@ -169,7 +169,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/batches"
+                  href="/tuitions"
                   className="hover:text-brand transition-colors"
                 >
                   Browse Tuitions
