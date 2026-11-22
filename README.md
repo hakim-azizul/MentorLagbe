@@ -1,6 +1,9 @@
 # MentorLagbe
 
 > **Find the right mentor. Teach with confidence. Grow on a platform built for real tuition workflows.**
+<img width="406" height="567" alt="image" src="https://github.com/user-attachments/assets/09c628c9-f870-44cb-9b6b-08d66a4f7c57" />
+<img width="405" height="563" alt="image" src="https://github.com/user-attachments/assets/55016a0f-960b-40d9-bcae-2f302f36cf6d" />
+
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.4.6-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.3-61DAFB?logo=react&logoColor=black)](https://react.dev/)
@@ -11,9 +14,7 @@
 [![Better Auth](https://img.shields.io/badge/Better_Auth-1.7.25-00D66C)](https://www.better-auth.com/)
 [![Stripe](https://img.shields.io/badge/Stripe-23.x-635BFF?logo=stripe&logoColor=white)](https://stripe.com/)
 
-**Live Demo:** _add deployment link_ · **Portfolio:** _add portfolio link_ · **Author:** Azizul Hakim ([@hakim-azizul](https://github.com/hakim-azizul))
-
----
+**Live Demo:** [_Click Here_ ](https://mentor-lagbe-seven.vercel.app/)· **Portfolio:** [_Dev Portfolio_](https://azizul-hakim-drab.vercel.app/) · **Author:** Azizul Hakim ([@hakim-azizul](https://github.com/hakim-azizul))
 
 ## The problem
 
