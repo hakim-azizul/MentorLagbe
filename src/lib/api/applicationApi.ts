@@ -35,6 +35,7 @@ export async function applyForTuition(
   return apiFetch<tApplyTuitionResult>("/api/applications", {
     method: "POST",
     body: applicationData,
+    auth: false,
   });
 }
 
@@ -44,5 +45,7 @@ export async function checkStudentApplication(
   email: string
 ): Promise<tApplicationCheck> {
   const params = new URLSearchParams({ tuitionId, email });
-  return apiFetch<tApplicationCheck>(`/api/applications/check?${params}`);
+  return apiFetch<tApplicationCheck>(`/api/applications/check?${params}`, {
+    auth: false,
+  });
 }

@@ -18,6 +18,11 @@ export type ApiOptions = {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
   body?: unknown;
   signal?: AbortSignal;
+  /**
+   * Set to `false` for public endpoints. Default `true` keeps protected
+   * routes working; public callers opt out so no JWT is requested.
+   */
+  auth?: boolean;
 };
 
 /**
@@ -25,8 +30,8 @@ export type ApiOptions = {
  *
  *  • `credentials: "include"` — ক্রস-অরিজিন কুকি যাওয়ার জন্য (সেশন-ভিত্তিক
  *    Next.js কল ও ভবিষ্যতের কুকি ফ্লোর জন্য অক্ষত)।
- *  • `Authorization: Bearer <JWT>` — mentor-server-এর প্রটেক্টেড রুট এই
- *    টোকেন verify করে (JWKS); টোকেন না থাকলে (পাবলিক/সাইন-আউট) হেডার যায় না।
+ *  • `auth: false` দিলে টোকেন চাওয়া হয় না — পাবলিক এন্ডপয়েন্টে এটি ব্যবহার করুন
+ *    (সাইন-আউট অবস্থায় `/api/auth/token`-এ 401 কল এড়াতে)।
  *  • ৪০১ এলে টোকেন একবার রিফ্রেশ করে রিট্রাই — মেয়াদোত্তীর্ণ টোকেনেও
  *    ইউজার ব্লক হবে না।
  */
@@ -34,7 +39,7 @@ export async function apiFetch<T>(
   path: string,
   options: ApiOptions = {}
 ): Promise<T> {
-  const { method = "GET", body, signal } = options;
+  const { method = "GET", body, signal, auth = true } = options;
   const requestBody = body !== undefined ? JSON.stringify(body) : undefined;
 
   const send = (token: string | null): Promise<Response> =>
@@ -53,7 +58,8 @@ export async function apiFetch<T>(
 
   let response: Response;
   try {
-    const token = await getJwt();
+    // Public endpoints must not trigger /api/auth/token (a 401 for guests).
+    const token = auth ? await getJwt() : null;
     response = await send(token);
 
     if (response.status === 401 && token && !signal?.aborted) {

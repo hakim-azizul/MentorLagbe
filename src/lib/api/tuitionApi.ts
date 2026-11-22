@@ -23,7 +23,10 @@ export async function fetchApprovedTuitions(
   signal?: AbortSignal
 ): Promise<tTuitionView[]> {
   const query = queryString ? `?${queryString}` : "";
-  return apiFetch<tTuitionView[]>(`/api/tuitions${query}`, { signal });
+  return apiFetch<tTuitionView[]>(`/api/tuitions${query}`, {
+    signal,
+    auth: false,
+  });
 }
 
 /**
@@ -48,10 +51,11 @@ export async function fetchTuitions({
 
   return apiFetch<tTuitionPage>(`/api/tuitions?${params.toString()}`, {
     signal,
+    auth: false,
   });
 }
 
 /** একটি টিউশনের বিস্তারিত তথ্য + টিউশনার প্রোফাইল সামারি। 404 হলে ApiError ফেলে। */
 export async function fetchTuitionById(id: string): Promise<tTuitionDetails> {
-  return apiFetch<tTuitionDetails>(`/api/tuitions/${id}`);
+  return apiFetch<tTuitionDetails>(`/api/tuitions/${id}`, { auth: false });
 }
