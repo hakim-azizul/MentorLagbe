@@ -18,7 +18,7 @@ import {
 } from "@/components/dashboard/LoadingStates";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import { useApi } from "@/hooks/useApi";
-import { formatCurrency } from "@/lib/format";
+import { formatUsdCurrency } from "@/lib/format";
 import type { AdminStats } from "@/lib/types/dashboard";
 
 export default function AdminOverview() {
@@ -79,7 +79,7 @@ export default function AdminOverview() {
             />
             <StatCard
               title="Total Revenue"
-              value={formatCurrency(data?.totalRevenue ?? 0)}
+              value={formatUsdCurrency(data?.totalRevenue ?? 0)}
               icon={Banknote}
               subtitle="Sum of all Stripe payments"
               badge={

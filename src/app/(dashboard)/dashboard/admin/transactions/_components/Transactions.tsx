@@ -17,7 +17,7 @@ import ErrorAlert from "@/components/dashboard/ErrorAlert";
 import { TableSkeleton } from "@/components/dashboard/LoadingStates";
 import StatusBadge from "@/components/dashboard/StatusBadge";
 import { useApi } from "@/hooks/useApi";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { formatUsdCurrency, formatDate } from "@/lib/format";
 import type { Payment } from "@/lib/types/payment";
 
 export default function Transactions() {
@@ -110,7 +110,7 @@ export default function Transactions() {
                       </StatusBadge>
                     </TableCell>
                     <TableCell className="font-semibold text-heading">
-                      {formatCurrency(payment.amount)}
+                      {formatUsdCurrency(payment.amount)}
                       {payment.currency && (
                         <span className="ml-1 text-xs font-normal uppercase text-body">
                           {payment.currency}
@@ -137,7 +137,7 @@ export default function Transactions() {
             <p className="text-sm text-body">
               Total{" "}
               <span className="font-extrabold text-heading">
-                {formatCurrency(total)}
+                {formatUsdCurrency(total)}
               </span>
             </p>
           </div>

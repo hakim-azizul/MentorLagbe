@@ -10,7 +10,12 @@ export function formatDate(value?: string | Date | null): string {
   });
 }
 
-/** ৳ সহ অঙ্কের ফরম্যাট */
+/** ৳ সহ অঙ্কের ফরম্যাট — BDT টিউশন ফির জন্য */
 export function formatCurrency(amount: number): string {
   return `৳${Number(amount || 0).toLocaleString("en-US")}`;
+}
+
+/** USD স্ট্রাই পেমেন্টের জন্য — `$10` + আলাদা `USD` লেবেল দেখানো হয় */
+export function formatUsdCurrency(amount: number): string {
+  return `$${Number(amount || 0).toLocaleString("en-US")}`;
 }
