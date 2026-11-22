@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import SafeImage from "@/components/shared/SafeImage";
 import { BookMarked, Pencil, PlusCircle, Trash2, ImagePlus } from "lucide-react";
 import {
   Table,
@@ -195,12 +195,17 @@ export default function MyTuitions({ email }: { email: string }) {
                     <div className="flex items-center gap-3">
                       <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-lg border border-border-subtle bg-surface">
                         {tuition.bannerImage ? (
-                          <Image
+                          <SafeImage
                             src={tuition.bannerImage}
                             alt={tuition.title}
                             fill
                             sizes="64px"
                             className="object-cover"
+                            fallback={
+                              <div className="flex h-full w-full items-center justify-center text-body">
+                                <ImagePlus className="h-4 w-4" />
+                              </div>
+                            }
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-body">
@@ -583,12 +588,17 @@ function EditTuitionDialog({
             <div className="flex items-center gap-3">
               <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg border border-border-subtle bg-surface">
                 {tuition.bannerImage ? (
-                  <Image
+                  <SafeImage
                     src={tuition.bannerImage}
                     alt={tuition.title}
                     fill
                     sizes="80px"
                     className="object-cover"
+                    fallback={
+                      <div className="flex h-full w-full items-center justify-center text-body">
+                        <ImagePlus className="h-4 w-4" />
+                      </div>
+                    }
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-body">

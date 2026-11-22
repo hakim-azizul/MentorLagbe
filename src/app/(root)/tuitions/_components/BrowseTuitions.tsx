@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import SafeImage from "@/components/shared/SafeImage";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
@@ -530,12 +530,17 @@ export default function BrowseTuitions() {
                 {/* Banner + overlay badges */}
                 <div className="relative h-48 w-full overflow-hidden bg-surface">
                   {tuition.bannerImage ? (
-                    <Image
+                    <SafeImage
                       src={tuition.bannerImage}
                       alt={tuition.title}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      fallback={
+                        <div className="absolute inset-0 flex items-center justify-center bg-brand-tint">
+                          <BookOpen className="h-10 w-10 text-brand" />
+                        </div>
+                      }
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-brand-tint">
@@ -593,12 +598,17 @@ export default function BrowseTuitions() {
                       <div className="flex items-center gap-2.5">
                         {/* টিউশনার ছবি — না থাকলে ইনিশিয়াল (ডিটেইলস পেজের মতোই) */}
                         {tuition.tutor.image ? (
-                          <Image
+                          <SafeImage
                             src={tuition.tutor.image}
                             alt={tuition.tutor.name}
                             width={36}
                             height={36}
                             className="h-9 w-9 rounded-xl border border-border-subtle object-cover"
+                            fallback={
+                              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-brand/20 bg-brand-tint text-xs font-bold text-heading">
+                                {initials(tuition.tutor.name)}
+                              </div>
+                            }
                           />
                         ) : (
                           <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-brand/20 bg-brand-tint text-xs font-bold text-heading">

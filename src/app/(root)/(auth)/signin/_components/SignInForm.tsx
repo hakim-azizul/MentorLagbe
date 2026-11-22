@@ -7,11 +7,12 @@ import { Mail, Lock, ArrowRight, Eye, EyeOff, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
-import { signIn } from "@/lib/auth-client";
+import { signIn, useSession } from "@/lib/auth-client";
 import { clearJwtCache } from "@/lib/api";
 
 export default function SignInForm() {
   const router = useRouter();
+  const { refetch: refetchSession } = useSession();
 
   // লগইন ফর্মের স্টেট
   const [formData, setFormData] = useState({
@@ -66,6 +67,9 @@ export default function SignInForm() {
 
       // পুরনো সাইন-আউট-আগের JWT ক্যাশ বাতিল — নতুন সেশনের টোকেনই যাবে
       clearJwtCache();
+
+      // client session atom-একও আপডেট না হলে Navbar/Guard-এ রিফ্রেশ লাগত
+      await refetchSession().catch(() => {});
 
       router.push("/");
       router.refresh();

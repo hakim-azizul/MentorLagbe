@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import SafeImage from "@/components/shared/SafeImage";
 import Link from "next/link";
 import { ArrowRight, Bookmark, Calendar, GraduationCap, MapPin, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -75,12 +75,17 @@ export default function SavedTuitions({ email }: { email: string }) {
             >
               <div className="relative h-44 w-full overflow-hidden bg-surface">
                 {tuition.bannerImage ? (
-                  <Image
+                  <SafeImage
                     src={tuition.bannerImage}
                     alt={tuition.title}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    fallback={
+                      <div className="absolute inset-0 flex items-center justify-center bg-brand-tint">
+                        <GraduationCap className="h-10 w-10 text-brand" />
+                      </div>
+                    }
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-brand-tint">

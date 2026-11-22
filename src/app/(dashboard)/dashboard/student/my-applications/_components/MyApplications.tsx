@@ -102,7 +102,7 @@ export default function MyApplications({ email }: { email: string }) {
         />
       ) : (
         <div className="rounded-3xl border border-border-subtle bg-background p-3 sm:p-4">
-          <Table>
+          <Table className="min-w-[760px]">
             <TableHeader>
               <TableRow className="border-border-subtle hover:bg-transparent">
                 <TableHead className="text-heading">Tuition Title</TableHead>
@@ -120,23 +120,33 @@ export default function MyApplications({ email }: { email: string }) {
                   className="border-border-subtle hover:bg-surface"
                 >
                   <TableCell className="max-w-56 font-semibold text-heading">
-                    {application.tuitionTitle}
+                    <span
+                      className="block truncate"
+                      title={application.tuitionTitle}
+                    >
+                      {application.tuitionTitle}
+                    </span>
                   </TableCell>
-                  <TableCell>
-                    <p className="font-medium text-heading">
-                      {application.tutorName || "—"}
-                    </p>
-                    <p className="text-xs text-body">
-                      {application.tutorEmail}
-                    </p>
+                  <TableCell className="max-w-52">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-heading">
+                        {application.tutorName || "—"}
+                      </p>
+                      <p
+                        className="truncate text-xs text-body"
+                        title={application.tutorEmail}
+                      >
+                        {application.tutorEmail}
+                      </p>
+                    </div>
                   </TableCell>
-                  <TableCell className="font-semibold text-heading">
+                  <TableCell className="whitespace-nowrap font-semibold text-heading">
                     {formatCurrency(application.monthlyFee)}
                   </TableCell>
-                  <TableCell className="text-body">
+                  <TableCell className="whitespace-nowrap text-body">
                     {formatDate(application.appliedAt)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <StatusBadge
                       tone={applicationTone(application.status)}
                       className="capitalize"
@@ -144,26 +154,30 @@ export default function MyApplications({ email }: { email: string }) {
                       {application.status}
                     </StatusBadge>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={application.status !== "pending" || submitting}
-                      onClick={() => {
-                        setActionError(null);
-                        setTargetId(application._id);
-                      }}
-                      className="border-border-subtle text-heading hover:border-red-300 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-500/40 dark:hover:bg-red-950/50 dark:hover:text-red-400 disabled:hover:border-border-subtle disabled:hover:bg-transparent"
-                      title={
-                        application.status !== "pending"
-                          ? "Only pending applications can be cancelled"
-                          : "Cancel application"
-                      }
-                    >
-                      <X className="h-3.5 w-3.5" />
-                      Cancel
-                    </Button>
+                  <TableCell className="whitespace-nowrap text-right">
+                    <div className="flex justify-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={
+                          application.status !== "pending" || submitting
+                        }
+                        onClick={() => {
+                          setActionError(null);
+                          setTargetId(application._id);
+                        }}
+                        className="shrink-0 whitespace-nowrap border-border-subtle text-heading hover:border-red-300 hover:bg-red-50 hover:text-red-600 dark:hover:border-red-500/40 dark:hover:bg-red-950/50 dark:hover:text-red-400 disabled:hover:border-border-subtle disabled:hover:bg-transparent"
+                        title={
+                          application.status !== "pending"
+                            ? "Only pending applications can be cancelled"
+                            : "Cancel application"
+                        }
+                      >
+                        <X className="h-3.5 w-3.5" />
+                        Cancel
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

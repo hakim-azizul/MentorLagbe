@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import SafeImage from "@/components/shared/SafeImage";
 import {
   BookOpen,
   Calendar,
@@ -47,12 +47,17 @@ export default function TuitionDetails({
             {/* Banner */}
             <div className="relative h-56 w-full overflow-hidden rounded-3xl border border-border-subtle bg-surface sm:h-72">
               {tuition.bannerImage ? (
-                <Image
+                <SafeImage
                   src={tuition.bannerImage}
                   alt={tuition.title}
                   fill
                   sizes="(max-width: 1024px) 100vw, 66vw"
                   className="object-cover"
+                  fallback={
+                    <div className="absolute inset-0 flex items-center justify-center bg-brand-tint">
+                      <BookOpen className="h-12 w-12 text-brand" />
+                    </div>
+                  }
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-brand-tint">
@@ -180,12 +185,17 @@ export default function TuitionDetails({
 
                 <div className="flex items-center gap-3">
                   {tutor.image ? (
-                    <Image
+                    <SafeImage
                       src={tutor.image}
                       alt={tutor.name}
                       width={56}
                       height={56}
                       className="h-14 w-14 rounded-2xl border border-border-subtle object-cover"
+                      fallback={
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-brand/20 bg-brand-tint text-base font-bold text-heading">
+                          {initials(tutor.name)}
+                        </div>
+                      }
                     />
                   ) : (
                     <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-brand/20 bg-brand-tint text-base font-bold text-heading">

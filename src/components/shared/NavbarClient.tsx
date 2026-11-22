@@ -12,7 +12,7 @@ import {
   LogOut,
   ChevronDown,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import ThemeToggle from "@/components/shared/ThemeToggle";
 import {
@@ -207,14 +207,12 @@ export default function NavbarClient({ user }: NavbarClientProps) {
 
                   <DropdownMenuSeparator className="bg-border-subtle" />
 
-                  <DropdownMenuItem className="cursor-pointer focus:bg-surface">
-                    <Link
-                      href="/dashboard/profile"
-                      className="flex items-center gap-2 text-heading"
-                    >
-                      <User className="h-4 w-4 text-body" />
-                      My Profile
-                    </Link>
+                  <DropdownMenuItem
+                    render={<Link href="/dashboard/profile" />}
+                    className="flex cursor-pointer items-center gap-2 text-heading focus:bg-surface"
+                  >
+                    <User className="h-4 w-4 text-body" />
+                    My Profile
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator className="bg-border-subtle" />
@@ -326,14 +324,14 @@ export default function NavbarClient({ user }: NavbarClientProps) {
                   <Link
                     href="/dashboard/profile"
                     onClick={() => setMobileMenuOpen(false)}
+                    className={buttonVariants({
+                      variant: "outline",
+                      className:
+                        "w-full gap-1.5 border-border-subtle text-heading",
+                    })}
                   >
-                    <Button
-                      variant="outline"
-                      className="w-full border-border-subtle text-heading gap-1.5"
-                    >
-                      <User className="h-4 w-4 text-body" />
-                      My Profile
-                    </Button>
+                    <User className="h-4 w-4 text-body" />
+                    My Profile
                   </Link>
                   <Button
                     variant="outline"

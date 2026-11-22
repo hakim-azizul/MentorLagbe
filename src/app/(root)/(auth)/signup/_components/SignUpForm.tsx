@@ -17,11 +17,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
-import { signUp } from "@/lib/auth-client";
+import { signUp, useSession } from "@/lib/auth-client";
 import { clearJwtCache } from "@/lib/api";
 
 export default function SignUpForm() {
   const router = useRouter();
+  const { refetch: refetchSession } = useSession();
 
   // ফর্মের ডেটা হ্যান্ডেল করার জন্য সাধারণ স্টেট
   const [formData, setFormData] = useState({
@@ -93,6 +94,9 @@ const handleSubmit = async (e: React.FormEvent) => {
 
       // নতুন অ্যাকাউন্টের টোকেন নতুন করে আনতে ক্যাশ বাতিল
       clearJwtCache();
+
+      // signUp সাধারণত sign-in করে, কিন্তু client atom আগের null থাকতে পারে
+      await refetchSession().catch(() => {});
 
       router.push("/");
       router.refresh();

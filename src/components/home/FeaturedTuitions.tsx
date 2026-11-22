@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import SafeImage from "@/components/shared/SafeImage";
 import {
+  BookOpen,
   MapPin,
   Video,
   Calendar,
@@ -129,7 +130,7 @@ export default function FeaturedTuitions({
                   {/* Card Top: Banner Image & Badges */}
                   <div>
                     <div className="relative h-48 w-full overflow-hidden bg-surface">
-                      <Image
+                      <SafeImage
                         src={
                           item.bannerImage ||
                           "https://i.ibb.co/Q7T1d591/Grow-the-community.png"
@@ -138,6 +139,11 @@ export default function FeaturedTuitions({
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        fallback={
+                          <div className="absolute inset-0 flex items-center justify-center bg-brand-tint">
+                            <BookOpen className="h-10 w-10 text-brand" />
+                          </div>
+                        }
                       />
                       {/* Mode Badge (Online / Offline) */}
                       <div className="absolute top-3 left-3">
@@ -206,12 +212,17 @@ export default function FeaturedTuitions({
                       <div className="flex items-center gap-2.5">
                         {tutorImage ? (
                           <div className="relative h-9 w-9 overflow-hidden rounded-xl border border-brand/20 shrink-0">
-                            <Image
+                            <SafeImage
                               src={tutorImage}
                               alt={tutorName}
                               fill
                               sizes="36px"
                               className="object-cover"
+                              fallback={
+                                <div className="flex h-full w-full items-center justify-center bg-brand-tint text-[10px] font-bold text-heading">
+                                  {initials}
+                                </div>
+                              }
                             />
                           </div>
                         ) : (
